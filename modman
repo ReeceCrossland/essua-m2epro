@@ -1,0 +1,13 @@
+app/code/community/Ess/M2ePro/
+app/design/adminhtml/default/default/layout/M2ePro.xml
+app/design/adminhtml/default/default/template/M2ePro/
+
+app/etc/modules/Ess_M2ePro.xml
+
+app/locale/en_GB/Ess_M2ePro.csv
+
+js/M2ePro/
+
+skin/adminhtml/default/default/M2ePro/
+
+skin/adminhtml/default/enterprise/M2ePro/
