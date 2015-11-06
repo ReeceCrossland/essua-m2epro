@@ -1,13 +1,15 @@
 <?php
 
 /*
- * @copyright  Copyright (c) 2013 by  ESS-UA.
+ * @author     M2E Pro Developers Team
+ * @copyright  2011-2015 ESS-UA [M2E Pro]
+ * @license    Commercial use is forbidden
  */
 
 class Ess_M2ePro_Model_Ebay_Listing_Product_Action_Type_Relist_Response
     extends Ess_M2ePro_Model_Ebay_Listing_Product_Action_Type_Response
 {
-    // ########################################
+    //########################################
 
     public function processSuccess(array $response, array $responseParams = array())
     {
@@ -16,7 +18,7 @@ class Ess_M2ePro_Model_Ebay_Listing_Product_Action_Type_Relist_Response
             'ebay_item_id' => $this->createEbayItem($response['ebay_item_id'])->getId()
         );
 
-        if ($this->getConfigurator()->isAllPermitted()) {
+        if ($this->getConfigurator()->isAllAllowed()) {
             $data['synch_status'] = Ess_M2ePro_Model_Listing_Product::SYNCH_STATUS_OK;
             $data['synch_reasons'] = NULL;
         }
@@ -51,7 +53,7 @@ class Ess_M2ePro_Model_Ebay_Listing_Product_Action_Type_Relist_Response
         $this->processSuccess($response,$responseParams);
     }
 
-    // ########################################
+    //########################################
 
     public function markAsPotentialDuplicate()
     {
@@ -68,6 +70,8 @@ class Ess_M2ePro_Model_Ebay_Listing_Product_Action_Type_Relist_Response
             'status' => Ess_M2ePro_Model_Listing_Product::STATUS_BLOCKED,
             'additional_data' => json_encode($additionalData),
         ))->save();
+
+        $this->getEbayListingProduct()->updateVariationsStatus();
     }
 
     public function markAsNotListedItem()
@@ -87,7 +91,7 @@ class Ess_M2ePro_Model_Ebay_Listing_Product_Action_Type_Relist_Response
              ->save();
     }
 
-    // ########################################
+    //########################################
 
     private function removeConditionNecessary($data)
     {
@@ -102,5 +106,5 @@ class Ess_M2ePro_Model_Ebay_Listing_Product_Action_Type_Relist_Response
         return $data;
     }
 
-    // ########################################
+    //########################################
 }

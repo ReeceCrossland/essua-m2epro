@@ -1,35 +1,35 @@
 <?php
 
 /*
- * @copyright  Copyright (c) 2012 by  ESS-UA.
+ * @author     M2E Pro Developers Team
+ * @copyright  2011-2015 ESS-UA [M2E Pro]
+ * @license    Commercial use is forbidden
  */
 
 class Ess_M2ePro_Block_Adminhtml_Common_ManageListings extends Ess_M2ePro_Block_Adminhtml_Widget_Container
 {
-    // ########################################
-
     const TAB_ID_LISTING = 'listing';
     const TAB_ID_LISTING_OTHER = 'listing_other';
     const TAB_ID_SEARCH = 'search';
 
-    // ########################################
+    //########################################
 
     public function __construct()
     {
         parent::__construct();
 
         // Initialization block
-        //------------------------------
+        // ---------------------------------------
         $this->setId('commonManageListings');
-        //------------------------------
+        // ---------------------------------------
 
         // Set header text
-        //------------------------------
+        // ---------------------------------------
         $this->_headerText = Mage::helper('M2ePro')->__('Listings');
-        //------------------------------
+        // ---------------------------------------
 
         // Set buttons actions
-        //------------------------------
+        // ---------------------------------------
         $this->removeButton('back');
         $this->removeButton('reset');
         $this->removeButton('delete');
@@ -37,12 +37,12 @@ class Ess_M2ePro_Block_Adminhtml_Common_ManageListings extends Ess_M2ePro_Block_
         $this->removeButton('save');
         $this->removeButton('edit');
 
-        //------------------------------
+        // ---------------------------------------
         $this->setTemplate('M2ePro/common/manageListings.phtml');
-        //------------------------------
+        // ---------------------------------------
     }
 
-    // ########################################
+    //########################################
 
     protected function _toHtml()
     {
@@ -51,24 +51,33 @@ class Ess_M2ePro_Block_Adminhtml_Common_ManageListings extends Ess_M2ePro_Block_
         $tabsContainer->setDestElementId('tabs_container');
 
         $tabsContainer->addTab(self::TAB_ID_LISTING, $this->prepareListingTab());
-        $tabsContainer->addTab(self::TAB_ID_LISTING_OTHER, $this->prepareListingOtherTab());
+
+        $script = '';
+
+        if (Mage::helper('M2ePro/View_Common')->is3rdPartyShouldBeShown(Ess_M2ePro_Helper_Component_Amazon::NICK) ||
+            Mage::helper('M2ePro/View_Common')->is3rdPartyShouldBeShown(Ess_M2ePro_Helper_Component_Buy::NICK)) {
+
+            $tabsContainer->addTab(self::TAB_ID_LISTING_OTHER, $this->prepareListingOtherTab());
+            $script = $this->getScriptFor3rdPartyControlVisibility($tabsContainer);
+        }
+
         $tabsContainer->addTab(self::TAB_ID_SEARCH, $this->prepareSearchTab());
 
         $tabsContainer->setActiveTab($this->getActiveTab());
 
         return parent::_toHtml() .
                $tabsContainer->toHtml() .
-               '<div id="tabs_container"></div>';
+               '<div id="tabs_container"></div>' . $script;
     }
 
-    // ########################################
+    //########################################
 
     protected function getActiveTab()
     {
         return $this->getRequest()->getParam('tab', self::TAB_ID_LISTING);
     }
 
-    // ########################################
+    //########################################
 
     private function prepareListingTab()
     {
@@ -121,5 +130,43 @@ class Ess_M2ePro_Block_Adminhtml_Common_ManageListings extends Ess_M2ePro_Block_
         return $tab;
     }
 
-    // ########################################
+    //########################################
+
+    private function getScriptFor3rdPartyControlVisibility($tabsContainer)
+    {
+        $listingOtherId = self::TAB_ID_LISTING_OTHER;
+        $amazonNick = Ess_M2ePro_Helper_Component_Amazon::NICK;
+        $buyNick = Ess_M2ePro_Helper_Component_Buy::NICK;
+        $isAmazon3rdPartyShouldBeShown = (int)Mage::helper('M2ePro/View_Common')
+            ->is3rdPartyShouldBeShown(Ess_M2ePro_Helper_Component_Amazon::NICK);
+        $isBuy3rdPartyShouldBeShown = (int)Mage::helper('M2ePro/View_Common')
+            ->is3rdPartyShouldBeShown(Ess_M2ePro_Helper_Component_Buy::NICK);
+
+        return "<script>
+                   function change3rdPartyVisibility(event) {
+                                var targetId = $(this).readAttribute('id'),
+                                    tab = $('{$tabsContainer->getId()}_{$listingOtherId}');
+
+                                if (!tab) {
+                                    return true;
+                                }
+
+                                if (targetId == 'listing_{$amazonNick}') {
+                                    (!{$isAmazon3rdPartyShouldBeShown}) ?
+                                        tab.style.display = 'none':
+                                        tab.style.display = '';
+                                }
+
+                                if (targetId == 'listing_{$buyNick}') {
+                                    (!{$isBuy3rdPartyShouldBeShown}) ?
+                                        tab.style.display = 'none':
+                                        tab.style.display = '';
+                                }
+
+                                return true;
+                            }
+               </script>";
+    }
+
+    //########################################
 }

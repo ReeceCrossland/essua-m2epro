@@ -1,25 +1,25 @@
 <?php
 
 /*
- * @copyright  Copyright (c) 2013 by  ESS-UA.
+ * @author     M2E Pro Developers Team
+ * @copyright  2011-2015 ESS-UA [M2E Pro]
+ * @license    Commercial use is forbidden
  */
 
 class Ess_M2ePro_Block_Adminhtml_Common_Log_Tabs extends Mage_Adminhtml_Block_Widget_Tabs
 {
-    // ########################################
-
     const CHANNEL_ID_ALL        = 'all';
     const CHANNEL_ID_AMAZON     = 'amazon';
     const CHANNEL_ID_BUY        = 'buy';
 
-    // ----------------------------------------
+    // ---------------------------------------
 
     const TAB_ID_LISTING            = 'listing';
     const TAB_ID_LISTING_OTHER      = 'listing_other';
     const TAB_ID_ORDER              = 'order';
     const TAB_ID_SYNCHRONIZATION    = 'synchronization';
 
-    // ########################################
+    //########################################
 
     protected $logType;
 
@@ -31,7 +31,7 @@ class Ess_M2ePro_Block_Adminhtml_Common_Log_Tabs extends Mage_Adminhtml_Block_Wi
         $this->logType = $logType;
     }
 
-    // ########################################
+    //########################################
 
     public function __construct()
     {
@@ -41,12 +41,20 @@ class Ess_M2ePro_Block_Adminhtml_Common_Log_Tabs extends Mage_Adminhtml_Block_Wi
         $this->setDestElementId('tabs_container');
     }
 
-    // ########################################
+    //########################################
 
     protected function _prepareLayout()
     {
+        if (!$this->isListingOtherTabShouldBeShown() && $this->getData('active_tab') == self::TAB_ID_LISTING_OTHER) {
+            $this->setData('active_tab', self::TAB_ID_LISTING);
+        }
+
         $this->addTab(self::TAB_ID_LISTING, $this->prepareTabListing());
-        $this->addTab(self::TAB_ID_LISTING_OTHER, $this->prepareTabListingOther());
+
+        if ($this->isListingOtherTabShouldBeShown()) {
+            $this->addTab(self::TAB_ID_LISTING_OTHER, $this->prepareTabListingOther());
+        }
+
         $this->addTab(self::TAB_ID_ORDER, $this->prepareTabOrder());
         $this->addTab(self::TAB_ID_SYNCHRONIZATION, $this->prepareTabSynchronization());
 
@@ -55,7 +63,7 @@ class Ess_M2ePro_Block_Adminhtml_Common_Log_Tabs extends Mage_Adminhtml_Block_Wi
         return parent::_prepareLayout();
     }
 
-    // ########################################
+    //########################################
 
     protected function prepareTabListing()
     {
@@ -128,7 +136,38 @@ class Ess_M2ePro_Block_Adminhtml_Common_Log_Tabs extends Mage_Adminhtml_Block_Wi
         return $tab;
     }
 
-    // ########################################
+    //########################################
+
+    protected function isListingOtherTabShouldBeShown()
+    {
+        $chanel = $this->getRequest()->getParam('channel');
+
+        if (is_null($chanel)) {
+            return true;
+        }
+
+        $helper = Mage::helper('M2ePro/View_Common');
+
+        if ($chanel == self::CHANNEL_ID_AMAZON &&
+            $helper->is3rdPartyShouldBeShown(Ess_M2ePro_Helper_Component_Amazon::NICK)) {
+            return true;
+        }
+
+        if ($chanel == self::CHANNEL_ID_BUY &&
+            $helper->is3rdPartyShouldBeShown(Ess_M2ePro_Helper_Component_Buy::NICK)) {
+            return true;
+        }
+
+        if ($chanel == self::CHANNEL_ID_ALL &&
+            ($helper->is3rdPartyShouldBeShown(Ess_M2ePro_Helper_Component_Amazon::NICK) ||
+             $helper->is3rdPartyShouldBeShown(Ess_M2ePro_Helper_Component_Buy::NICK))) {
+            return true;
+        }
+
+        return false;
+    }
+
+    //########################################
 
     protected function _toHtml()
     {
@@ -153,5 +192,5 @@ JAVASCIRPT;
         return $javascript . parent::_toHtml() . '<div id="tabs_container"></div>';
     }
 
-    // ########################################
+    //########################################
 }

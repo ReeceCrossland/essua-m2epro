@@ -1,15 +1,14 @@
 <?php
 
 /*
- * @copyright  Copyright (c) 2013 by  ESS-UA.
+ * @author     M2E Pro Developers Team
+ * @copyright  2011-2015 ESS-UA [M2E Pro]
+ * @license    Commercial use is forbidden
  */
 
 class Ess_M2ePro_Helper_Component_Ebay extends Mage_Core_Helper_Abstract
 {
-    // M2ePro_TRANSLATIONS
-    // eBay
     const NICK  = 'ebay';
-    const TITLE = 'eBay';
 
     const MARKETPLACE_US     = 1;
     const MARKETPLACE_MOTORS = 9;
@@ -21,14 +20,39 @@ class Ess_M2ePro_Helper_Component_Ebay extends Mage_Core_Helper_Abstract
 
     const MAX_LENGTH_FOR_OPTION_VALUE = 50;
 
-    // ########################################
+    //########################################
 
     public function getTitle()
     {
-        return Mage::helper('M2ePro')->__(self::TITLE);
+        return Mage::helper('M2ePro')->__('eBay');
     }
 
-    // ########################################
+    public function getChannelTitle()
+    {
+        return Mage::helper('M2ePro')->__('eBay');
+    }
+
+    //########################################
+
+    public function getHumanTitleByListingProductStatus($status) {
+        $statuses = array(
+            Ess_M2ePro_Model_Listing_Product::STATUS_NOT_LISTED => Mage::helper('M2ePro')->__('Not Listed'),
+            Ess_M2ePro_Model_Listing_Product::STATUS_LISTED     => Mage::helper('M2ePro')->__('Listed'),
+            Ess_M2ePro_Model_Listing_Product::STATUS_HIDDEN     => Mage::helper('M2ePro')->__('Listed (Hidden)'),
+            Ess_M2ePro_Model_Listing_Product::STATUS_SOLD       => Mage::helper('M2ePro')->__('Sold'),
+            Ess_M2ePro_Model_Listing_Product::STATUS_STOPPED    => Mage::helper('M2ePro')->__('Stopped'),
+            Ess_M2ePro_Model_Listing_Product::STATUS_FINISHED   => Mage::helper('M2ePro')->__('Finished'),
+            Ess_M2ePro_Model_Listing_Product::STATUS_BLOCKED    => Mage::helper('M2ePro')->__('Pending')
+        );
+
+        if (!isset($statuses[$status])) {
+            return NULL;
+        }
+
+        return $statuses[$status];
+    }
+
+    //########################################
 
     public function isEnabled()
     {
@@ -51,7 +75,7 @@ class Ess_M2ePro_Helper_Component_Ebay extends Mage_Core_Helper_Abstract
         return !is_null($mode) && $mode == self::NICK;
     }
 
-    //-----------------------------------------
+    // ---------------------------------------
 
     public function getModel($modelName)
     {
@@ -78,7 +102,7 @@ class Ess_M2ePro_Helper_Component_Ebay extends Mage_Core_Helper_Abstract
     public function getListingProductByEbayItem($ebayItem, $accountId)
     {
         // Get listing product
-        //-----------------------------
+        // ---------------------------------------
         $readConnection = Mage::getResourceModel('core/config')->getReadConnection();
 
         $ebayItem  = $readConnection->quoteInto('?', $ebayItem);
@@ -92,7 +116,7 @@ class Ess_M2ePro_Helper_Component_Ebay extends Mage_Core_Helper_Abstract
                                                  AND mei.account_id = {$accountId})",
             array()
         );
-        //-----------------------------
+        // ---------------------------------------
 
         if ($collection->getSize() == 0) {
             return NULL;
@@ -101,7 +125,7 @@ class Ess_M2ePro_Helper_Component_Ebay extends Mage_Core_Helper_Abstract
         return $collection->getFirstItem();
     }
 
-    // ########################################
+    //########################################
 
     public function getItemUrl($ebayItemId,
                                $accountMode = Ess_M2ePro_Model_Ebay_Account::MODE_PRODUCTION,
@@ -129,7 +153,7 @@ class Ess_M2ePro_Helper_Component_Ebay extends Mage_Core_Helper_Abstract
         return 'http://myworld.'.$domain.'/'.(string)$ebayMemberId;
     }
 
-    // ########################################
+    //########################################
 
     public function getCurrencies()
     {
@@ -178,7 +202,7 @@ class Ess_M2ePro_Helper_Component_Ebay extends Mage_Core_Helper_Abstract
         );
     }
 
-    // ########################################
+    //########################################
 
     public function isShowTaxCategory()
     {
@@ -202,7 +226,7 @@ class Ess_M2ePro_Helper_Component_Ebay extends Mage_Core_Helper_Abstract
         );
     }
 
-    // ########################################
+    //########################################
 
     public function reduceOptionsForVariations(array $options)
     {
@@ -240,14 +264,14 @@ class Ess_M2ePro_Helper_Component_Ebay extends Mage_Core_Helper_Abstract
         return $options;
     }
 
-    // ----------------------------------------
+    // ---------------------------------------
 
     public function getImagesHash(array $images)
     {
-        return sha1(json_encode($images)).'#'.date('dmY');
+        return sha1(json_encode($images));
     }
 
-    // ########################################
+    //########################################
 
     public function getTranslationServices()
     {
@@ -271,12 +295,12 @@ class Ess_M2ePro_Helper_Component_Ebay extends Mage_Core_Helper_Abstract
         return isset($translationServices[$service]);
     }
 
-    // ########################################
+    //########################################
 
     public function clearCache()
     {
         Mage::helper('M2ePro/Data_Cache_Permanent')->removeTagValues(self::NICK);
     }
 
-    // ########################################
+    //########################################
 }

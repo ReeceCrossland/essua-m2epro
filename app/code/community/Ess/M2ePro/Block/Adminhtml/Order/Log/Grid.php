@@ -1,11 +1,15 @@
 <?php
 
 /*
- * @copyright  Copyright (c) 2013 by  ESS-UA.
+ * @author     M2E Pro Developers Team
+ * @copyright  2011-2015 ESS-UA [M2E Pro]
+ * @license    Commercial use is forbidden
  */
 
 class Ess_M2ePro_Block_Adminhtml_Order_Log_Grid extends Mage_Adminhtml_Block_Widget_Grid
 {
+    //########################################
+
     public function __construct()
     {
         parent::__construct();
@@ -13,17 +17,17 @@ class Ess_M2ePro_Block_Adminhtml_Order_Log_Grid extends Mage_Adminhtml_Block_Wid
         $channel = $this->getRequest()->getParam('channel');
 
         // Initialization block
-        //------------------------------
+        // ---------------------------------------
         $this->setId(ucfirst($channel) . 'OrderLogGrid');
-        //------------------------------
+        // ---------------------------------------
 
         // Set default values
-        //------------------------------
+        // ---------------------------------------
         $this->setDefaultSort('create_date');
         $this->setDefaultDir('DESC');
         $this->setSaveParametersInSession(true);
         $this->setUseAjax(true);
-        //------------------------------
+        // ---------------------------------------
     }
 
     protected function _prepareCollection()
@@ -44,7 +48,7 @@ class Ess_M2ePro_Block_Adminhtml_Order_Log_Grid extends Mage_Adminhtml_Block_Wid
         );
 
         $orderId = $this->getRequest()->getParam('order_id');
-        if ($orderId && !$this->getRequest()->isAjax()) {
+        if ($orderId && !$this->getRequest()->isXmlHttpRequest()) {
             $collection->addFieldToFilter('main_table.order_id', (int)$orderId);
 
             /** @var Ess_M2ePro_Model_Order $order */
@@ -65,11 +69,11 @@ class Ess_M2ePro_Block_Adminhtml_Order_Log_Grid extends Mage_Adminhtml_Block_Wid
             $collection->addFieldToFilter('main_table.component_mode', array('in'=>$components));
         }
 
-        //--------------------------------
+        // ---------------------------------------
         if ($this->getRequest()->getParam('sort', 'create_date') == 'create_date') {
             $collection->setOrder('id', $this->getRequest()->getParam('dir', 'DESC'));
         }
-        //--------------------------------
+        // ---------------------------------------
 
         $this->setCollection($collection);
 
@@ -88,6 +92,15 @@ class Ess_M2ePro_Block_Adminhtml_Order_Log_Grid extends Mage_Adminhtml_Block_Wid
             'filter_index' => 'main_table.create_date'
         ));
 
+        $this->addColumn('magento_order_number', array(
+            'header'    => Mage::helper('M2ePro')->__('Magento Order #'),
+            'align'     => 'left',
+            'width'     => '150px',
+            'index'     => 'so.increment_id',
+            'sortable'      => false,
+            'frame_callback' => array($this, 'callbackColumnMagentoOrderNumber')
+        ));
+
         $this->addColumn('channel_order_id', array(
             'header'    => Mage::helper('M2ePro')->__('Order #'),
             'align'     => 'left',
@@ -98,21 +111,12 @@ class Ess_M2ePro_Block_Adminhtml_Order_Log_Grid extends Mage_Adminhtml_Block_Wid
             'filter_condition_callback' => array($this, 'callbackFilterChannelOrderId')
         ));
 
-        $this->addColumn('magento_order_number', array(
-            'header'    => Mage::helper('M2ePro')->__('Magento Order #'),
-            'align'     => 'left',
-            'width'     => '150px',
-            'index'     => 'so.increment_id',
-            'sortable'      => false,
-            'frame_callback' => array($this, 'callbackColumnMagentoOrderNumber')
-        ));
-
-        $this->addColumn('message', array(
+        $this->addColumn('description', array(
             'header'    => Mage::helper('M2ePro')->__('Description'),
             'align'     => 'left',
             'width'     => '*',
-            'index'     => 'message',
-            'frame_callback' => array($this, 'callbackColumnMessage')
+            'index'     => 'description',
+            'frame_callback' => array($this, 'callbackColumnDescription')
         ));
 
         $this->addColumn('initiator', array(
@@ -149,11 +153,11 @@ class Ess_M2ePro_Block_Adminhtml_Order_Log_Grid extends Mage_Adminhtml_Block_Wid
         return parent::_prepareColumns();
     }
 
-    //##############################################################
+    //########################################
 
-    public function callbackColumnMessage($value, $row, $column, $isExport)
+    public function callbackColumnDescription($value, $row, $column, $isExport)
     {
-        return Mage::helper('M2ePro/View')->getModifiedLogMessage($row->getData('message'));
+        return Mage::helper('M2ePro/View')->getModifiedLogMessage($row->getData('description'));
     }
 
     public function callbackColumnType($value, $row, $column, $isExport)
@@ -278,10 +282,10 @@ class Ess_M2ePro_Block_Adminhtml_Order_Log_Grid extends Mage_Adminhtml_Block_Wid
 
         $ordersIds = array_unique($ordersIds);
 
-        $collection->addFieldToFilter('`main_table`.order_id', array('in' => $ordersIds));
+        $collection->addFieldToFilter('main_table.order_id', array('in' => $ordersIds));
     }
 
-    //##############################################################
+    //########################################
 
     public function getRowUrl($row)
     {
@@ -295,4 +299,6 @@ class Ess_M2ePro_Block_Adminhtml_Order_Log_Grid extends Mage_Adminhtml_Block_Wid
             'channel' => $this->getRequest()->getParam('channel')
         ));
     }
+
+    //########################################
 }

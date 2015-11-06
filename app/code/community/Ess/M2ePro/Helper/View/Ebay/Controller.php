@@ -1,16 +1,18 @@
 <?php
 
 /*
- * @copyright  Copyright (c) 2013 by  ESS-UA.
+ * @author     M2E Pro Developers Team
+ * @copyright  2011-2015 ESS-UA [M2E Pro]
+ * @license    Commercial use is forbidden
  */
 
 class Ess_M2ePro_Helper_View_Ebay_Controller extends Mage_Core_Helper_Abstract
 {
-    // ########################################
+    //########################################
 
     public function addMessages(Ess_M2ePro_Controller_Adminhtml_BaseController $controller)
     {
-        if (Mage::helper('M2ePro/Module_Cron')->isReadyToRun() &&
+        if (Mage::helper('M2ePro/Module')->isReadyToWork() &&
             Mage::helper('M2ePro/Module_Cron')->isLastRunMoreThan(1,true) &&
             !Mage::helper('M2ePro/Module')->isDevelopmentEnvironment()) {
             $this->addCronNotificationMessage($controller);
@@ -30,7 +32,7 @@ class Ess_M2ePro_Helper_View_Ebay_Controller extends Mage_Core_Helper_Abstract
         }
     }
 
-    // ########################################
+    //########################################
 
     private function addCronNotificationMessage(Ess_M2ePro_Controller_Adminhtml_BaseController $controller)
     {
@@ -59,7 +61,7 @@ class Ess_M2ePro_Helper_View_Ebay_Controller extends Mage_Core_Helper_Abstract
         $controller->getSession()->addNotice($message);
     }
 
-    //#############################################
+    //########################################
 
     private function addTokenExpirationDateNotificationMessage(
                             Ess_M2ePro_Controller_Adminhtml_BaseController $controller)
@@ -203,11 +205,11 @@ Do not forget to press Save Button after returning back to Magento
         }
 
 // M2ePro_TRANSLATIONS
-// %marketplace_title% data was changed on eBay. You need to synchronize it the Extension works properly. Please, go to %menu_label% > Configuration > <a href="%url%" target="_blank">eBay Sites</a> and click the Save And Update Button.
+// %marketplace_title% data was changed on eBay. You need to synchronize it the Extension works properly. Please, go to %menu_label% > Configuration > <a href="%url%" target="_blank">eBay Sites</a> and click the Update All Now Button.
 
         $message = '%marketplace_title% data was changed on eBay. You need to synchronize it'.
                    ' the Extension works properly. Please, go to %menu_path% > '.
-                   '<a href="%url%" target="_blank">eBay Sites</a> and click the Save And Update Button.';
+                   '<a href="%url%" target="_blank">eBay Sites</a> and click the Update All Now Button.';
 
         $controller->getSession()->addNotice(Mage::helper('M2ePro')->__(
             $message,
@@ -220,7 +222,7 @@ Do not forget to press Save Button after returning back to Magento
         ));
     }
 
-    // #############################################
+    //########################################
 
     private function haveNewNegativeFeedbacks()
     {
@@ -246,5 +248,5 @@ Do not forget to press Save Button after returning back to Magento
         return false;
     }
 
-    //#############################################
+    //########################################
 }

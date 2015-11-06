@@ -1,74 +1,52 @@
 <?php
 
 /*
- * @copyright  Copyright (c) 2013 by  ESS-UA.
+ * @author     M2E Pro Developers Team
+ * @copyright  2011-2015 ESS-UA [M2E Pro]
+ * @license    Commercial use is forbidden
  */
 
 class Ess_M2ePro_Block_Adminhtml_Common_Marketplace extends Ess_M2ePro_Block_Adminhtml_Common_Component_Tabs_Container
 {
     const TAB_ID_RAKUTEN = 'rakuten';
 
-    // ########################################
-
-    private $activeWizardNick = NULL;
-
-    // ########################################
+    //########################################
 
     public function __construct()
     {
         parent::__construct();
 
         // Initialization block
-        //------------------------------
+        // ---------------------------------------
         $this->setId('marketplace');
         $this->_blockGroup = 'M2ePro';
         $this->_controller = 'adminhtml_common_marketplace';
-        //------------------------------
+        // ---------------------------------------
 
         // Form id of marketplace_general_form
-        //------------------------------
+        // ---------------------------------------
         $this->tabsContainerId = 'edit_form';
-        //------------------------------
+        // ---------------------------------------
 
         $this->_headerText = '';
 
-        if ((bool)$this->getRequest()->getParam('wizard',false)) {
+        $this->setTemplate(NULL);
 
-            $this->_headerText = Mage::helper('M2ePro')->__('Marketplaces');
+        // ---------------------------------------
+        $this->addButton('run_update_all', array(
+            'label' => Mage::helper('M2ePro')->__('Update All Now'),
+            'onclick' => 'MarketplaceHandlerObj.updateAction()',
+            'class' => 'save update_all_marketplace'
+        ));
+        // ---------------------------------------
 
-            $this->activeWizardNick = Mage::helper('M2ePro/Module_Wizard')->getNick(
-                Mage::helper('M2ePro/Module_Wizard')->getActiveWizard(Ess_M2ePro_Helper_View_Common::NICK)
-            );
-
-            $this->setEnabledTab($this->getTabIdByWizardNick($this->activeWizardNick));
-
-            //------------------------------
-            $this->_addButton('close', array(
-                'label'     => Mage::helper('M2ePro')->__('Save And Complete This Step'),
-                'onclick'   => 'MarketplaceHandlerObj.completeStepAction();',
-                'class'     => 'close'
-            ));
-            //------------------------------
-        } else {
-
-            $this->setTemplate(NULL);
-
-            //------------------------------
-            $this->addButton('run_update_all', array(
-                'label' => Mage::helper('M2ePro')->__('Update All Now'),
-                'onclick' => 'MarketplaceHandlerObj.updateAction()',
-                'class' => 'save update_all_marketplace'
-            ));
-            //------------------------------
-
-            //------------------------------
-            $this->_addButton('run_synch_now', array(
-                'label'     => Mage::helper('M2ePro')->__('Save'),
-                'onclick'   => 'MarketplaceHandlerObj.saveAction();',
-                'class'     => 'save save_and_update_marketplaces'
-            ));
-            //------------------------------
-        }
+        // ---------------------------------------
+        $this->_addButton('run_synch_now', array(
+            'label'     => Mage::helper('M2ePro')->__('Save'),
+            'onclick'   => 'MarketplaceHandlerObj.saveAction();',
+            'class'     => 'save save_and_update_marketplaces'
+        ));
+        // ---------------------------------------
     }
 
     protected function initializeTabs()
@@ -84,7 +62,7 @@ class Ess_M2ePro_Block_Adminhtml_Common_Marketplace extends Ess_M2ePro_Block_Adm
         }
     }
 
-    // ########################################
+    //########################################
 
     public function setEnabledTab($id)
     {
@@ -105,7 +83,7 @@ class Ess_M2ePro_Block_Adminhtml_Common_Marketplace extends Ess_M2ePro_Block_Adm
         return $activeTab;
     }
 
-    // ########################################
+    //########################################
 
     protected function getAmazonTabBlock()
     {
@@ -128,8 +106,7 @@ class Ess_M2ePro_Block_Adminhtml_Common_Marketplace extends Ess_M2ePro_Block_Adm
         if (!$this->getChild('rakuten_tab')) {
             $this->setChild(
                 'rakuten_tab',
-                $this->getLayout()->createBlock('M2ePro/adminhtml_common_rakuten_marketplace_form','',
-                                                 array('active_wizard' => $this->activeWizardNick))
+                $this->getLayout()->createBlock('M2ePro/adminhtml_common_rakuten_marketplace_form','')
             );
         }
         return $this->getChild('rakuten_tab');
@@ -140,7 +117,7 @@ class Ess_M2ePro_Block_Adminhtml_Common_Marketplace extends Ess_M2ePro_Block_Adm
         return $this->getRakutenTabBlock()->toHtml();
     }
 
-    // ########################################
+    //########################################
 
     protected function getTabLabelById($id)
     {
@@ -186,15 +163,8 @@ class Ess_M2ePro_Block_Adminhtml_Common_Marketplace extends Ess_M2ePro_Block_Adm
             $hideChannels = ' style="visibility: hidden"';
         }
 
-        $hideTabsHeader = '';
-        $help = '';
-        if ((bool)$this->getRequest()->getParam('wizard',false)) {
-            $hideTabsHeader = ' style="display: none"';
-            $help = $this->getLayout()->createBlock('M2ePro/adminhtml_common_marketplace_help')->toHtml();
-        }
-
         return <<<HTML
-<div class="content-header skip-header"{$hideTabsHeader}>
+<div class="content-header skip-header">
     <table cellspacing="0">
         <tr>
             <td{$hideChannels}>{$tabsContainer->toHtml()}</td>
@@ -202,7 +172,6 @@ class Ess_M2ePro_Block_Adminhtml_Common_Marketplace extends Ess_M2ePro_Block_Adm
         </tr>
     </table>
 </div>
-{$help}
 {$formBlock->toHtml()}
 HTML;
 
@@ -213,23 +182,7 @@ HTML;
         return '';
     }
 
-    protected function getTabIdByWizardNick($wizardNick)
-    {
-        if ($wizardNick == Ess_M2ePro_Helper_Component_Amazon::NICK) {
-            return self::TAB_ID_AMAZON;
-        }
-
-        return self::TAB_ID_RAKUTEN;
-    }
-
-    // ########################################
-
-    public function canShowUpdateNowButton()
-    {
-        return !(bool)$this->getRequest()->getParam('wizard',false);
-    }
-
-    // ########################################
+    //########################################
 
     protected function getTabsContainerBlock()
     {
@@ -240,5 +193,5 @@ HTML;
         return $this->tabsContainerBlock;
     }
 
-    // ########################################
+    //########################################
 }

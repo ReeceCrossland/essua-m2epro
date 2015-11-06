@@ -1,39 +1,43 @@
 <?php
 
 /*
- * @copyright  Copyright (c) 2013 by  ESS-UA.
+ * @author     M2E Pro Developers Team
+ * @copyright  2011-2015 ESS-UA [M2E Pro]
+ * @license    Commercial use is forbidden
  */
 
 class Ess_M2ePro_Block_Adminhtml_Common_Log extends Ess_M2ePro_Block_Adminhtml_Widget_Container
 {
+    //########################################
+
     public function __construct()
     {
         parent::__construct();
 
         // Initialization block
-        //------------------------------
+        // ---------------------------------------
         $this->setId('commonLog');
-        //------------------------------
+        // ---------------------------------------
 
         // Set header text
-        //------------------------------
+        // ---------------------------------------
         $this->_headerText = Mage::helper('M2ePro')->__('Logs');
-        //------------------------------
+        // ---------------------------------------
 
         // Set buttons actions
-        //------------------------------
+        // ---------------------------------------
         $this->removeButton('back');
         $this->removeButton('delete');
         $this->removeButton('add');
         $this->removeButton('save');
         $this->removeButton('edit');
 
-        //------------------------------
+        // ---------------------------------------
         $this->setTemplate('M2ePro/common/log/log.phtml');
-        //------------------------------
+        // ---------------------------------------
     }
 
-    // ########################################
+    //########################################
 
     public function getHeaderHtml()
     {
@@ -46,7 +50,7 @@ class Ess_M2ePro_Block_Adminhtml_Common_Log extends Ess_M2ePro_Block_Adminhtml_W
         );
         $dropDownBlock = $this->getLayout()->createBlock('M2ePro/adminhtml_widget_button_dropDown');
         $dropDownBlock->setData($data);
-        //------------------------------
+        // ---------------------------------------
 
         return parent::getHeaderHtml() . $dropDownBlock->toHtml();
     }
@@ -57,7 +61,7 @@ class Ess_M2ePro_Block_Adminhtml_Common_Log extends Ess_M2ePro_Block_Adminhtml_W
 
         if (Mage::helper('M2ePro/Component_Amazon')->isActive()) {
             $items[] = array(
-                'label' => Mage::helper('M2ePro')->__(Ess_M2ePro_Helper_Component_Amazon::TITLE),
+                'label' => Mage::helper('M2ePro/Component_Amazon')->getTitle(),
                 'url' => $this->getUrl('*/*/*', array(
                     '_current' => true,
                     'channel' => Ess_M2ePro_Block_Adminhtml_Common_Log_Tabs::CHANNEL_ID_AMAZON
@@ -66,7 +70,7 @@ class Ess_M2ePro_Block_Adminhtml_Common_Log extends Ess_M2ePro_Block_Adminhtml_W
         }
         if (Mage::helper('M2ePro/Component_Buy')->isActive()) {
             $items[] = array(
-                'label' => Mage::helper('M2ePro')->__(Ess_M2ePro_Helper_Component_Buy::TITLE),
+                'label' => Mage::helper('M2ePro/Component_Buy')->getTitle(),
                 'url' => $this->getUrl('*/*/*', array(
                     '_current' => true,
                     'channel' => Ess_M2ePro_Block_Adminhtml_Common_Log_Tabs::CHANNEL_ID_BUY
@@ -87,14 +91,14 @@ class Ess_M2ePro_Block_Adminhtml_Common_Log extends Ess_M2ePro_Block_Adminhtml_W
         return $items;
     }
 
-    // ----------------------------------------
+    // ---------------------------------------
 
     public function getHeaderText()
     {
-        //------------------------------
+        // ---------------------------------------
         $headerText = parent::getHeaderText();
         $channelTitle = '';
-        //------------------------------
+        // ---------------------------------------
 
         $enabledComponents = Mage::helper('M2ePro/View_Common_Component')->getActiveComponents();
 
@@ -104,7 +108,7 @@ class Ess_M2ePro_Block_Adminhtml_Common_Log extends Ess_M2ePro_Block_Adminhtml_W
 
             $channel = $this->getRequest()->getParam('channel');
             if (!empty($channel) && $channel != Ess_M2ePro_Block_Adminhtml_Common_Log_Tabs::CHANNEL_ID_ALL) {
-                $channelTitle = constant( 'Ess_M2ePro_Helper_Component_' . ucfirst($channel) . '::TITLE' );
+                $channelTitle = Mage::helper('M2ePro/Component_' . ucfirst($channel))->getTitle();
             } else {
                 $channelTitle = Mage::helper('M2ePro')->escapeHtml('All Channels');
             }
@@ -121,7 +125,7 @@ HTML;
         return $headerText . $channelTitle;
     }
 
-    // ########################################
+    //########################################
 
     protected function _toHtml()
     {
@@ -163,5 +167,5 @@ JAVASCIRPT;
             '<div id="tabs_container"></div>';
     }
 
-    // ########################################
+    //########################################
 }

@@ -1,15 +1,32 @@
 <?php
 
 /*
- * @copyright  Copyright (c) 2015 by  ESS-UA.
- *
+ * @author     M2E Pro Developers Team
+ * @copyright  2011-2015 ESS-UA [M2E Pro]
+ * @license    Commercial use is forbidden
+ */
+
+/*
     $model = Mage::getModel('M2ePro/PublicServices_Product_SqlChange');
 
-    $model->markProductAttributeChanged(17, 'custom_attribute', 1);
+    // notify M2E Pro about some change of product with ID 17
+    $model->markProductChanged(17);
+
+    // make price change of product with ID 18 and then notify M2E Pro
     $model->markPriceWasChanged(18);
 
+    // make QTY change of product with ID 19 and then notify M2E Pro
+    $model->markQtyWasChanged(19);
+
+    // make status change of product with ID 20 and then notify M2E Pro
+    $model->markStatusWasChanged(20);
+
+    // make attribute 'custom_attribute_code' value change from 'old' to 'new' of product with ID 21
+    // in store with ID 1 and then notify M2E Pro
+    $model->markProductAttributeChanged(21, 'custom_attribute_code', 1, 'old', 'new');
+
     $model->applyChanges();
- */
+*/
 
 class Ess_M2ePro_Model_PublicServices_Product_SqlChange
 {
@@ -17,7 +34,7 @@ class Ess_M2ePro_Model_PublicServices_Product_SqlChange
 
     protected $changes = array();
 
-    //####################################
+    //########################################
 
     public function needPreventDuplicates($value = null)
     {
@@ -29,7 +46,7 @@ class Ess_M2ePro_Model_PublicServices_Product_SqlChange
         return $this;
     }
 
-    //------------------------------------
+    // ---------------------------------------
 
     public function applyChanges()
     {
@@ -45,13 +62,16 @@ class Ess_M2ePro_Model_PublicServices_Product_SqlChange
         return $this->flushChanges();
     }
 
+    /**
+     * @return $this
+     */
     public function flushChanges()
     {
         $this->changes = array();
         return $this;
     }
 
-    //####################################
+    //########################################
 
     public function markProductChanged($productId)
     {
@@ -91,7 +111,7 @@ class Ess_M2ePro_Model_PublicServices_Product_SqlChange
         return $this->_addChange($change);
     }
 
-    //------------------------------------
+    // ---------------------------------------
 
     public function markProductCreated($productId)
     {
@@ -113,7 +133,7 @@ class Ess_M2ePro_Model_PublicServices_Product_SqlChange
         return $this->_addChange($change);
     }
 
-    //####################################
+    //########################################
 
     private function _getSkeleton()
     {
@@ -152,7 +172,7 @@ class Ess_M2ePro_Model_PublicServices_Product_SqlChange
         return $this;
     }
 
-    //-----------------------------------
+    // ---------------------------------------
 
     private function getAffectedProductsIds()
     {
@@ -180,7 +200,7 @@ class Ess_M2ePro_Model_PublicServices_Product_SqlChange
         return true;
     }
 
-    //-----------------------------------
+    // ---------------------------------------
 
     private function filterOnlyAffectedChanges()
     {
@@ -280,5 +300,5 @@ class Ess_M2ePro_Model_PublicServices_Product_SqlChange
         $connWrite->insertMultiple($tableName, $this->changes);
     }
 
-    //####################################
+    //########################################
 }

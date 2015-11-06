@@ -1,6 +1,6 @@
-BuyListingProductSearchHandler = Class.create(ActionHandler, {
+CommonBuyListingProductSearchHandler = Class.create(ActionHandler, {
 
-    //----------------------------------
+    // ---------------------------------------
 
     initialize: function($super,gridHandler)
     {
@@ -15,7 +15,7 @@ BuyListingProductSearchHandler = Class.create(ActionHandler, {
         $('productSearchMenu_pop_up_content').remove();
     },
 
-    //----------------------------------
+    // ---------------------------------------
 
     initMenuEvents: function()
     {
@@ -51,7 +51,7 @@ BuyListingProductSearchHandler = Class.create(ActionHandler, {
         });
     },
 
-    //----------------------------------
+    // ---------------------------------------
 
     options: {},
 
@@ -61,11 +61,11 @@ BuyListingProductSearchHandler = Class.create(ActionHandler, {
         return this;
     },
 
-    //----------------------------------
+    // ---------------------------------------
 
     params: {autoMapErrorFlag: false},
 
-    //----------------------------------
+    // ---------------------------------------
 
     openPopUp: function(mode, title, productId, errorMsg)
     {
@@ -140,7 +140,7 @@ BuyListingProductSearchHandler = Class.create(ActionHandler, {
         self.autoHeightFix();
     },
 
-    //----------------------------------
+    // ---------------------------------------
 
     showSearchManualPrompt: function()
     {
@@ -167,7 +167,7 @@ BuyListingProductSearchHandler = Class.create(ActionHandler, {
         $('modal_dialog_message').insert(self.searchBlock);
         $('productSearch_pop_up_content').show();
         self.initSearchEvents();
-        //search manual
+        // search manual
         $('productSearch_form').show();
         $('productSearch_back_button').show();
         $('productSearch_buttons').show();
@@ -198,11 +198,6 @@ BuyListingProductSearchHandler = Class.create(ActionHandler, {
 
     addNewGeneralId: function(listingProductIds)
     {
-        if (!this.options.customData.isMarketplaceSynchronized) {
-            alert(this.options.text.not_synchronized_marketplace.replace('%code%',this.options.customData.marketplace.code));
-            return setLocation(this.options.url.marketplace_synch);
-        }
-
         listingProductIds = listingProductIds || this.params.productId;
 
         this.postForm(
@@ -213,7 +208,7 @@ BuyListingProductSearchHandler = Class.create(ActionHandler, {
         );
     },
 
-    //----------------------------------
+    // ---------------------------------------
 
     searchGeneralIdManual: function(productId)
     {
@@ -341,7 +336,7 @@ BuyListingProductSearchHandler = Class.create(ActionHandler, {
         });
     },
 
-    //----------------------------------
+    // ---------------------------------------
 
     mapToGeneralId: function(productId, generalId)
     {
@@ -355,7 +350,9 @@ BuyListingProductSearchHandler = Class.create(ActionHandler, {
             method: 'post',
             parameters: {
                 product_id: productId,
-                general_id: generalId
+                general_id: generalId,
+                search_type: $('buy_asin_search_type').value,
+                search_value: $('buy_asin_search_value').value
             },
             onSuccess: function(transport) {
                 if (transport.responseText == 0) {
@@ -473,7 +470,7 @@ BuyListingProductSearchHandler = Class.create(ActionHandler, {
         $('buy_link_' + id).innerHTML = buyLinkTemplate;
     },
 
-    //----------------------------------
+    // ---------------------------------------
 
     clearSearchResultsAndOpenSearchMenu: function() {
         var self = this;
@@ -486,5 +483,5 @@ BuyListingProductSearchHandler = Class.create(ActionHandler, {
         }
     },
 
-    //----------------------------------
+    // ---------------------------------------
 });

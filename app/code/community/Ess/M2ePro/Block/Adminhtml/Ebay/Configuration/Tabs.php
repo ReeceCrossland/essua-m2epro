@@ -1,13 +1,13 @@
 <?php
 
 /*
- * @copyright  Copyright (c) 2013 by  ESS-UA.
+ * @author     M2E Pro Developers Team
+ * @copyright  2011-2015 ESS-UA [M2E Pro]
+ * @license    Commercial use is forbidden
  */
 
 class Ess_M2ePro_Block_Adminhtml_Ebay_Configuration_Tabs extends Mage_Adminhtml_Block_Widget_Tabs
 {
-    // ########################################
-
     const TAB_ID_SYNCHRONIZATION        = 'synchronization';
     const TAB_ID_TEMPLATE               = 'template';
     const TAB_ID_CATEGORY               = 'category';
@@ -16,7 +16,7 @@ class Ess_M2ePro_Block_Adminhtml_Ebay_Configuration_Tabs extends Mage_Adminhtml_
     const TAB_ID_ACCOUNT                = 'account';
     const TAB_ID_GLOBAL                 = 'global';
 
-    // ########################################
+    //########################################
 
     public function __construct()
     {
@@ -26,7 +26,7 @@ class Ess_M2ePro_Block_Adminhtml_Ebay_Configuration_Tabs extends Mage_Adminhtml_
         $this->setDestElementId('tabs_container');
     }
 
-    // ########################################
+    //########################################
 
     protected function _prepareLayout()
     {
@@ -45,7 +45,7 @@ class Ess_M2ePro_Block_Adminhtml_Ebay_Configuration_Tabs extends Mage_Adminhtml_
         return parent::_prepareLayout();
     }
 
-    // ########################################
+    //########################################
 
     protected function prepareTabMarketplace()
     {
@@ -172,5 +172,5 @@ class Ess_M2ePro_Block_Adminhtml_Ebay_Configuration_Tabs extends Mage_Adminhtml_
         return $tab;
     }
 
-    // ########################################
+    //########################################
 }

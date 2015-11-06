@@ -1,5 +1,11 @@
 <?php
 
+/*
+ * @author     M2E Pro Developers Team
+ * @copyright  2011-2015 ESS-UA [M2E Pro]
+ * @license    Commercial use is forbidden
+ */
+
 class M2eProChangesCatcher extends Magmi_ItemProcessor
 {
     const CHANGE_UPDATE_ATTRIBUTE_CODE = '__INSTANCE__';
@@ -8,21 +14,30 @@ class M2eProChangesCatcher extends Magmi_ItemProcessor
 
     protected $changes = array();
 
-    // ########################################
+    protected $statistics = array(
+        'not_presented' => 0,
+        'existed'       => 0,
+        'inserted'      => 0
+    );
+
+    //########################################
 
     public function initialize($params) {}
 
+    /**
+     * @return array
+     */
     public function getPluginInfo()
     {
         return array(
             "name"    => "Ess M2ePro Product Changes Inspector",
             "author"  => "ESS",
-            "version" => "1.0.0.1",
-            "url"     => "" //todo doc
+            "version" => "1.0.4",
+            "url"     => "http://docs.m2epro.com/display/BestPractice/Plugin+for+Magmi+Import+Tool"
         );
     }
 
-    // ########################################
+    //########################################
 
     public function processItemAfterId(&$item, $params = null)
     {
@@ -40,21 +55,25 @@ class M2eProChangesCatcher extends Magmi_ItemProcessor
         return $result;
     }
 
-    public function afterImport()
+    /**
+     * @return bool
+     */
+    public function endImport()
     {
-        $result = parent::afterImport();
-
         $this->filterOnlyAffectedChanges();
         $this->insertChanges();
 
-        return $result;
+        return true;
     }
 
-    // ########################################
+    //########################################
 
     private function filterOnlyAffectedChanges()
     {
-        if (count($this->changes) <= 0) {
+        $count = count($this->changes);
+        $this->log("Will be checked {$count} products.");
+
+        if ($count <= 0) {
             return;
         }
 
@@ -78,6 +97,7 @@ class M2eProChangesCatcher extends Magmi_ItemProcessor
         foreach ($this->changes as $key => $change) {
 
             if (!in_array($change['product_id'], $productsInListings)) {
+                $this->statistics['not_presented']++;
                 unset($this->changes[$key]);
             }
         }
@@ -86,17 +106,26 @@ class M2eProChangesCatcher extends Magmi_ItemProcessor
     private function insertChanges()
     {
         if (count($this->changes) <= 0) {
+            $this->log('The updated products are not presented in the M2e Pro Listings.');
             return;
         }
 
         $tableName = $this->tablename('m2epro_product_change');
-        $stmt = $this->select("SELECT *
-                               FROM `{$tableName}`
-                               WHERE `product_id` IN (?)", array_keys($this->changes));
 
         $existedChanges = array();
-        while ($row = $stmt->fetch()) {
-            $existedChanges[] = $row['product_id'].'##'.$row['attribute'];
+        foreach (array_chunk($this->changes, 500, true) as $productChangesPart) {
+
+            if (count($productChangesPart) <= 0) {
+                continue;
+            }
+
+            $stmt = $this->select("SELECT *
+                           FROM `{$tableName}`
+                           WHERE `product_id` IN (?)", implode(',', array_keys($productChangesPart)));
+
+            while ($row = $stmt->fetch()) {
+                $existedChanges[] = $row['product_id'].'##'.$row['attribute'];
+            }
         }
 
         $insertSql = "INSERT INTO `{$tableName}`
@@ -106,9 +135,11 @@ class M2eProChangesCatcher extends Magmi_ItemProcessor
         foreach ($this->changes as $productId => $change) {
 
             if (in_array($change['product_id'].'##'.$change['attribute'], $existedChanges)) {
+                $this->statistics['existed']++;
                 continue;
             }
 
+            $this->statistics['inserted']++;
             $this->insert($insertSql, array($change['product_id'],
                                             $change['action'],
                                             $change['attribute'],
@@ -116,7 +147,30 @@ class M2eProChangesCatcher extends Magmi_ItemProcessor
                                             $change['update_date'],
                                             $change['create_date']));
         }
+
+        $this->saveStatistics();
     }
 
-    // ########################################
+    //########################################
+
+    protected function resetStatistics()
+    {
+        $this->statistics = array(
+            'not_presented' => 0,
+            'existed'       => 0,
+            'inserted'      => 0
+        );
+    }
+
+    protected function saveStatistics()
+    {
+        $message  = "Not presented (skipped): {$this->statistics['not_presented']} ## ";
+        $message .= "Existed (skipped): {$this->statistics['existed']} ## ";
+        $message .= "Processed: {$this->statistics['inserted']}.";
+
+        $this->log($message);
+        $this->resetStatistics();
+    }
+
+    //########################################
 }

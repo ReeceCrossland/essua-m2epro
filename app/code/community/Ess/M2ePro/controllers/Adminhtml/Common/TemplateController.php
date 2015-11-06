@@ -1,13 +1,15 @@
 <?php
 
 /*
- * @copyright  Copyright (c) 2013 by  ESS-UA.
+ * @author     M2E Pro Developers Team
+ * @copyright  2011-2015 ESS-UA [M2E Pro]
+ * @license    Commercial use is forbidden
  */
 
 class Ess_M2ePro_Adminhtml_Common_TemplateController
     extends Ess_M2ePro_Controller_Adminhtml_Common_MainController
 {
-    //#############################################
+    //########################################
 
     protected function _initAction()
     {
@@ -18,16 +20,17 @@ class Ess_M2ePro_Adminhtml_Common_TemplateController
         $this->getLayout()->getBlock('head')->addJs('M2ePro/Plugin/DropDown.js')
             ->addCss('M2ePro/css/Plugin/DropDown.css');
 
+        $this->setComponentPageHelpLink('Policies');
+
         return $this;
     }
 
     protected function _isAllowed()
     {
-        return Mage::getSingleton('admin/session')->isAllowed('m2epro_common/templates/selling_format') &&
-               Mage::getSingleton('admin/session')->isAllowed('m2epro_common/templates/synchronization');
+        return Mage::getSingleton('admin/session')->isAllowed('m2epro_common/configuration');
     }
 
-    //#############################################
+    //########################################
 
     public function indexAction()
     {
@@ -52,7 +55,7 @@ class Ess_M2ePro_Adminhtml_Common_TemplateController
         $this->getResponse()->setBody($block->toHtml());
     }
 
-    //#############################################
+    //########################################
 
     public function newAction()
     {
@@ -66,12 +69,18 @@ class Ess_M2ePro_Adminhtml_Common_TemplateController
             ));
         }
 
+        if ($type == Ess_M2ePro_Block_Adminhtml_Common_Amazon_Template_Grid::TEMPLATE_SHIPPING_OVERRIDE) {
+            return $this->_redirect(
+                "*/adminhtml_common_amazon_template_shippingOverride/edit"
+            );
+        }
+
         $type = $this->prepareTemplateType($type);
 
         return $this->_redirect("*/adminhtml_common_{$channel}_template_{$type}/edit");
     }
 
-    //#############################################
+    //########################################
 
     public function editAction()
     {
@@ -83,6 +92,12 @@ class Ess_M2ePro_Adminhtml_Common_TemplateController
             return $this->_redirect('*/*/index', array(
                 'channel' => $this->getRequest()->getParam('channel')
             ));
+        }
+
+        if ($type == Ess_M2ePro_Block_Adminhtml_Common_Amazon_Template_Grid::TEMPLATE_SHIPPING_OVERRIDE) {
+            return $this->_redirect(
+                "*/adminhtml_common_amazon_template_shippingOverride/edit", array('id'=>$id)
+            );
         }
 
         $type = $this->prepareTemplateType($type);
@@ -117,7 +132,12 @@ class Ess_M2ePro_Adminhtml_Common_TemplateController
         $deleted = $locked = 0;
 
         foreach ($ids as $id) {
-            $template = Mage::helper('M2ePro/Component')->getUnknownObject('Template_' . $type, $id);
+            if (strtolower($type)==Ess_M2ePro_Block_Adminhtml_Common_Amazon_Template_Grid::TEMPLATE_SHIPPING_OVERRIDE) {
+                $template = Mage::getModel('M2ePro/Amazon_Template_ShippingOverride')->load($id);
+            } else {
+                $template = Mage::helper('M2ePro/Component')->getUnknownObject('Template_' . $type, $id);
+            }
+
             if ($template->isLocked()) {
                 $locked++;
             } else {
@@ -138,11 +158,13 @@ class Ess_M2ePro_Adminhtml_Common_TemplateController
         ));
     }
 
-    //#############################################
+    //########################################
 
     private function prepareTemplateType($type)
     {
         return $type == Ess_M2ePro_Block_Adminhtml_Common_Template_Grid::TEMPLATE_SELLING_FORMAT ?
             'SellingFormat' : ucfirst($type);
     }
+
+    //########################################
 }

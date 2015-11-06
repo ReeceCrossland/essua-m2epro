@@ -1,7 +1,9 @@
 <?php
 
 /*
- * @copyright  Copyright (c) 2014 by  ESS-UA.
+ * @author     M2E Pro Developers Team
+ * @copyright  2011-2015 ESS-UA [M2E Pro]
+ * @license    Commercial use is forbidden
  */
 
 class Ess_M2ePro_Helper_Data extends Mage_Core_Helper_Abstract
@@ -17,7 +19,7 @@ class Ess_M2ePro_Helper_Data extends Mage_Core_Helper_Abstract
 
     const CUSTOM_IDENTIFIER = 'm2epro_extension';
 
-    // ########################################
+    //########################################
 
     public function __()
     {
@@ -25,7 +27,7 @@ class Ess_M2ePro_Helper_Data extends Mage_Core_Helper_Abstract
         return Mage::helper('M2ePro/Module_Translation')->translate($args);
     }
 
-    // ########################################
+    //########################################
 
     /**
      * @param $modelName
@@ -43,7 +45,7 @@ class Ess_M2ePro_Helper_Data extends Mage_Core_Helper_Abstract
         return Mage::helper('M2ePro'.(string)$helperName);
     }
 
-    //-----------------------------------------
+    // ---------------------------------------
 
     /**
      * @param string $modelName
@@ -102,7 +104,7 @@ class Ess_M2ePro_Helper_Data extends Mage_Core_Helper_Abstract
         return $cacheData;
     }
 
-    // ########################################
+    //########################################
 
     public function getCurrentGmtDate($returnTimestamp = false, $format = NULL)
     {
@@ -120,7 +122,7 @@ class Ess_M2ePro_Helper_Data extends Mage_Core_Helper_Abstract
         return Mage::getModel('core/date')->date($format);
     }
 
-    //-----------------------------------------
+    // ---------------------------------------
 
     public function getDate($date, $returnTimestamp = false, $format = NULL)
     {
@@ -143,7 +145,7 @@ class Ess_M2ePro_Helper_Data extends Mage_Core_Helper_Abstract
         return $result;
     }
 
-    //-----------------------------------------
+    // ---------------------------------------
 
     public function gmtDateToTimezone($dateGmt, $returnTimestamp = false, $format = NULL)
     {
@@ -161,7 +163,7 @@ class Ess_M2ePro_Helper_Data extends Mage_Core_Helper_Abstract
         return Mage::getModel('core/date')->gmtDate($format,$dateTimezone);
     }
 
-    // ########################################
+    //########################################
 
     public function escapeJs($string)
     {
@@ -180,11 +182,18 @@ class Ess_M2ePro_Helper_Data extends Mage_Core_Helper_Abstract
         } else {
             // process single item
             if (strlen($data)) {
-                if (is_array($allowedTags) and !empty($allowedTags)) {
+                if (is_array($allowedTags) && !empty($allowedTags)) {
                     $allowed = implode('|', $allowedTags);
-                    $result = preg_replace('/<([\/\s\r\n]*)(' . $allowed . ')([\/\s\r\n]*)>/si', '##$1$2$3##', $data);
+
+                    $pattern = '/<([\/\s\r\n]*)(' . $allowed . ')'.
+                        '((\s+\w+="[\w\s\%\?=&#\/\.;:_\-\(\)]*")*[\/\s\r\n]*)>/si';
+                    $result = preg_replace($pattern, '##$1$2$3##', $data);
+
                     $result = htmlspecialchars($result, $flags);
-                    $result = preg_replace('/##([\/\s\r\n]*)(' . $allowed . ')([\/\s\r\n]*)##/si', '<$1$2$3>', $result);
+
+                    $pattern = '/##([\/\s\r\n]*)(' . $allowed . ')'.
+                        '((\s+\w+="[\w\s\%\?=&#\/\.;:_\-\(\)]*")*[\/\s\r\n]*)##/si';
+                    $result = preg_replace($pattern, '<$1$2$3>', $result);
                 } else {
                     $result = htmlspecialchars($data, $flags);
                 }
@@ -195,7 +204,7 @@ class Ess_M2ePro_Helper_Data extends Mage_Core_Helper_Abstract
         return $result;
     }
 
-    // ########################################
+    //########################################
 
     public function reduceWordsInString($string, $neededLength, $longWord = 6, $minWordLen = 2, $atEndOfWord = '.')
     {
@@ -222,7 +231,7 @@ class Ess_M2ePro_Helper_Data extends Mage_Core_Helper_Abstract
         }
 
         $weightOfOneLetter = $needToBeReduced / $canBeReduced;
-        foreach($longWords as $word => $canBeReducedForWord) {
+        foreach ($longWords as $word => $canBeReducedForWord) {
 
             $willReduced = ceil($weightOfOneLetter * $canBeReducedForWord);
             $reducedWord = substr($word, 0, strlen($word) - $willReduced) . $atEndOfWord;
@@ -307,13 +316,13 @@ class Ess_M2ePro_Helper_Data extends Mage_Core_Helper_Abstract
                     }
 
                 }
-            } while(count($head_stack));
+            } while (count($head_stack));
         }
 
         return $base;
     }
 
-    // ########################################
+    //########################################
 
     public function makeBackUrlParam($backIdOrRoute, array $backParams = array())
     {
@@ -329,7 +338,7 @@ class Ess_M2ePro_Helper_Data extends Mage_Core_Helper_Abstract
             ? $requestParams['back'] : $this->makeBackUrlParam($defaultBackIdOrRoute,$defaultBackParams);
     }
 
-    //------------------------------------------
+    // ---------------------------------------
 
     public function getBackUrl($defaultBackIdOrRoute = 'index',
                                array $defaultBackParams = array(),
@@ -337,7 +346,6 @@ class Ess_M2ePro_Helper_Data extends Mage_Core_Helper_Abstract
     {
         $back = base64_decode($this->getBackUrlParam($defaultBackIdOrRoute,$defaultBackParams));
 
-        $route = '';
         $params = array();
 
         if (strpos($back,'|') !== false) {
@@ -371,12 +379,12 @@ class Ess_M2ePro_Helper_Data extends Mage_Core_Helper_Abstract
         return Mage::helper('adminhtml')->getUrl($route,$params);
     }
 
-    // ########################################
+    //########################################
 
     public function getClassConstantAsJson($class)
     {
         if (stripos($class,'Ess_M2ePro_') === false) {
-            throw new Exception('Class name must begin with "Ess_M2ePro"');
+            throw new Ess_M2ePro_Model_Exception('Class name must begin with "Ess_M2ePro"');
         }
 
         $reflectionClass = new ReflectionClass($class);
@@ -424,7 +432,7 @@ class Ess_M2ePro_Helper_Data extends Mage_Core_Helper_Abstract
         return $actions;
     }
 
-    // ########################################
+    //########################################
 
     public function generateUniqueHash($strParam = NULL, $maxLength = NULL)
     {
@@ -472,14 +480,14 @@ class Ess_M2ePro_Helper_Data extends Mage_Core_Helper_Abstract
         return self::STATUS_SUCCESS;
     }
 
-    // ########################################
+    //########################################
 
     public function isISBN($string)
     {
         return $this->isISBN10($string) || $this->isISBN13($string);
     }
 
-    //-----------------------------------------
+    // ---------------------------------------
 
     public function isISBN10($string)
     {
@@ -517,7 +525,7 @@ class Ess_M2ePro_Helper_Data extends Mage_Core_Helper_Abstract
         return $check % 10 == 0;
     }
 
-    // ########################################
+    //########################################
 
     public function isUPC($upc)
     {
@@ -529,7 +537,7 @@ class Ess_M2ePro_Helper_Data extends Mage_Core_Helper_Abstract
         return $this->isWorldWideId($ean,'EAN');
     }
 
-    //-----------------------------------------
+    // ---------------------------------------
 
     private function isWorldWideId($worldWideId,$type)
     {
@@ -558,5 +566,5 @@ class Ess_M2ePro_Helper_Data extends Mage_Core_Helper_Abstract
         return $result;
     }
 
-    // ########################################
+    //########################################
 }

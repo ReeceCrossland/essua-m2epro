@@ -1,7 +1,9 @@
 <?php
 
 /*
- * @copyright  Copyright (c) 2013 by  ESS-UA.
+ * @author     M2E Pro Developers Team
+ * @copyright  2011-2015 ESS-UA [M2E Pro]
+ * @license    Commercial use is forbidden
  */
 
 class Ess_M2ePro_Model_Amazon_Listing_Other_Moving
@@ -13,7 +15,7 @@ class Ess_M2ePro_Model_Amazon_Listing_Other_Moving
 
     protected $tempObjectsCache = array();
 
-    // ########################################
+    //########################################
 
     public function initialize(Ess_M2ePro_Model_Account $account = NULL)
     {
@@ -21,8 +23,12 @@ class Ess_M2ePro_Model_Amazon_Listing_Other_Moving
         $this->tempObjectsCache = array();
     }
 
-    // ########################################
+    //########################################
 
+    /**
+     * @param array $otherListings
+     * @return bool
+     */
     public function autoMoveOtherListingsProducts(array $otherListings)
     {
         $otherListingsFiltered = array();
@@ -62,6 +68,11 @@ class Ess_M2ePro_Model_Amazon_Listing_Other_Moving
         return $result;
     }
 
+    /**
+     * @param Ess_M2ePro_Model_Listing_Other $otherListing
+     * @return bool
+     * @throws Ess_M2ePro_Model_Exception_Logic
+     */
     public function autoMoveOtherListingProduct(Ess_M2ePro_Model_Listing_Other $otherListing)
     {
         $this->setAccountByOtherListingProduct($otherListing);
@@ -107,7 +118,7 @@ class Ess_M2ePro_Model_Amazon_Listing_Other_Moving
         $listingProduct->addData($dataForUpdate)->save();
 
         // Set listing store id to Amazon Item
-        //---------------------------------
+        // ---------------------------------------
         $itemsCollection = Mage::getModel('M2ePro/Amazon_Item')->getCollection();
 
         $itemsCollection->addFieldToFilter('account_id', $otherListing->getAccountId());
@@ -127,7 +138,7 @@ class Ess_M2ePro_Model_Amazon_Listing_Other_Moving
             );
             Mage::getModel('M2ePro/Amazon_Item')->setData($dataForAdd)->save();
         }
-        //---------------------------------
+        // ---------------------------------------
 
         $logModel = Mage::getModel('M2ePro/Listing_Other_Log');
         $logModel->setComponentMode(Ess_M2ePro_Helper_Component_Amazon::NICK);
@@ -157,8 +168,8 @@ class Ess_M2ePro_Model_Amazon_Listing_Other_Moving
 
         if (!$this->getAmazonAccount()->isOtherListingsMoveToListingsSynchModeNone()) {
             Mage::getModel('M2ePro/ProductChange')
-                ->addUpdateAction( $otherListing->getProductId(),
-                                   Ess_M2ePro_Model_ProductChange::INITIATOR_UNKNOWN );
+                ->addUpdateAction($otherListing->getProductId(),
+                                   Ess_M2ePro_Model_ProductChange::INITIATOR_UNKNOWN);
         }
 
         $otherListing->deleteInstance();
@@ -166,7 +177,7 @@ class Ess_M2ePro_Model_Amazon_Listing_Other_Moving
         return true;
     }
 
-    // ########################################
+    //########################################
 
     /**
      * @param Ess_M2ePro_Model_Listing_Other $otherListing
@@ -224,7 +235,7 @@ class Ess_M2ePro_Model_Amazon_Listing_Other_Moving
         return $tempModel;
     }
 
-    //-----------------------------------------
+    // ---------------------------------------
 
     /**
      * @param Ess_M2ePro_Model_Listing_Other $otherListing
@@ -267,8 +278,14 @@ class Ess_M2ePro_Model_Amazon_Listing_Other_Moving
             'relist_qty_value_max' => 10,
             'revise_update_qty' => Ess_M2ePro_Model_Amazon_Template_Synchronization::REVISE_UPDATE_QTY_NONE,
             'revise_update_price' => Ess_M2ePro_Model_Amazon_Template_Synchronization::REVISE_UPDATE_PRICE_NONE,
+            'revise_update_details' => Ess_M2ePro_Model_Amazon_Template_Synchronization::REVISE_UPDATE_DETAILS_NONE,
+            'revise_update_images' => Ess_M2ePro_Model_Amazon_Template_Synchronization::REVISE_UPDATE_IMAGES_NONE,
             'revise_change_selling_format_template' =>
                                 Ess_M2ePro_Model_Template_Synchronization::REVISE_CHANGE_SELLING_FORMAT_TEMPLATE_NONE,
+            'revise_change_description_template' =>
+                            Ess_M2ePro_Model_Amazon_Template_Synchronization::REVISE_CHANGE_DESCRIPTION_TEMPLATE_NONE,
+            'revise_change_shipping_override_template' =>
+                Ess_M2ePro_Model_Amazon_Template_Synchronization::REVISE_CHANGE_SHIPPING_OVERRIDE_TEMPLATE_NONE,
             'revise_change_listing' =>
                                 Ess_M2ePro_Model_Template_Synchronization::REVISE_CHANGE_LISTING_NONE,
             'stop_status_disabled' => Ess_M2ePro_Model_Amazon_Template_Synchronization::STOP_STATUS_DISABLED_NONE,
@@ -363,7 +380,7 @@ class Ess_M2ePro_Model_Amazon_Listing_Other_Moving
         return $tempModel;
     }
 
-    // ########################################
+    //########################################
 
     /**
      * @return Ess_M2ePro_Model_Account
@@ -389,8 +406,11 @@ class Ess_M2ePro_Model_Amazon_Listing_Other_Moving
         return $this->getAmazonAccount()->getMarketplace();
     }
 
-    //-----------------------------------------
+    // ---------------------------------------
 
+    /**
+     * @param Ess_M2ePro_Model_Listing_Other $otherListing
+     */
     protected function setAccountByOtherListingProduct(Ess_M2ePro_Model_Listing_Other $otherListing)
     {
         if (!is_null($this->account) && $this->account->getId() == $otherListing->getAccountId()) {
@@ -402,5 +422,5 @@ class Ess_M2ePro_Model_Amazon_Listing_Other_Moving
         );
     }
 
-    // ########################################
+    //########################################
 }

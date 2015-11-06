@@ -1,17 +1,17 @@
 <?php
 
 /*
- * @copyright  Copyright (c) 2013 by  ESS-UA.
+ * @author     M2E Pro Developers Team
+ * @copyright  2011-2015 ESS-UA [M2E Pro]
+ * @license    Commercial use is forbidden
  */
 
 abstract class Ess_M2ePro_Block_Adminhtml_Common_Component_Abstract extends Ess_M2ePro_Block_Adminhtml_Widget_Container
 {
-    // ########################################
-
     const TAB_ID_AMAZON = 'amazon';
     const TAB_ID_BUY    = 'buy';
 
-    // ########################################
+    //########################################
 
     protected $tabs = array();
 
@@ -25,7 +25,7 @@ abstract class Ess_M2ePro_Block_Adminhtml_Common_Component_Abstract extends Ess_
 
     protected $tabsAjaxUrls = array();
 
-    // ########################################
+    //########################################
 
     static public function getTabIdByComponent($component)
     {
@@ -43,7 +43,7 @@ abstract class Ess_M2ePro_Block_Adminhtml_Common_Component_Abstract extends Ess_
         return $tabId;
     }
 
-    // ########################################
+    //########################################
 
     public function enableAmazonTab()
     {
@@ -55,14 +55,14 @@ abstract class Ess_M2ePro_Block_Adminhtml_Common_Component_Abstract extends Ess_
         $this->setEnabledTab(self::TAB_ID_BUY);
     }
 
-    // ########################################
+    //########################################
 
     public function setEnabledTab($id)
     {
         $this->enabledTab = $id;
     }
 
-    // ----------------------------------------
+    // ---------------------------------------
 
     protected function isTabEnabled($id)
     {
@@ -73,7 +73,7 @@ abstract class Ess_M2ePro_Block_Adminhtml_Common_Component_Abstract extends Ess_
         return $id == $this->enabledTab;
     }
 
-    // ----------------------------------------
+    // ---------------------------------------
 
     protected function canUseAjax()
     {
@@ -84,7 +84,7 @@ abstract class Ess_M2ePro_Block_Adminhtml_Common_Component_Abstract extends Ess_
         return $this->useAjax;
     }
 
-    // ########################################
+    //########################################
 
     protected function initializeTabs()
     {
@@ -113,7 +113,7 @@ abstract class Ess_M2ePro_Block_Adminhtml_Common_Component_Abstract extends Ess_
         }
     }
 
-    // ########################################
+    //########################################
 
     protected function getTabBlockById($id)
     {
@@ -141,10 +141,13 @@ abstract class Ess_M2ePro_Block_Adminhtml_Common_Component_Abstract extends Ess_
 
     protected function getTabLabelById($id)
     {
-        $id = ucfirst($id);
-        $label = @constant("Ess_M2ePro_Helper_Component_{$id}::TITLE");
+        $label = '';
 
-        return $label ? Mage::helper('M2ePro')->__($label) : Mage::helper('M2ePro')->__('N/A');
+        if (in_array($id, Mage::helper('M2ePro/Component')->getComponents())) {
+            $label = Mage::helper('M2ePro/Component_' . ucfirst($id))->getTitle();
+        }
+
+        return $label ? $label : Mage::helper('M2ePro')->__('N/A');
     }
 
     protected function getTabUrlById($id)
@@ -152,12 +155,12 @@ abstract class Ess_M2ePro_Block_Adminhtml_Common_Component_Abstract extends Ess_
         return isset($this->tabsAjaxUrls[$id]) ? $this->tabsAjaxUrls[$id] : '';
     }
 
-    // ########################################
+    //########################################
 
     protected function _prepareLayout()
     {
         if (count(Mage::helper('M2ePro/View_Common_Component')->getActiveComponents()) == 0) {
-            throw new LogicException('At least 1 Channel should be enabled.');
+            throw new Ess_M2ePro_Model_Exception_Logic('At least 1 Channel should be enabled.');
         }
 
         $this->initializeTabs();
@@ -165,7 +168,7 @@ abstract class Ess_M2ePro_Block_Adminhtml_Common_Component_Abstract extends Ess_
         parent::_prepareLayout();
     }
 
-    // ########################################
+    //########################################
 
     protected function _toHtml()
     {
@@ -199,7 +202,7 @@ abstract class Ess_M2ePro_Block_Adminhtml_Common_Component_Abstract extends Ess_
         return $tabsContainer->toHtml() . $this->getTabsContainerDestinationHtml();
     }
 
-    // ########################################
+    //########################################
 
     protected function prepareTabById($id)
     {
@@ -220,7 +223,7 @@ abstract class Ess_M2ePro_Block_Adminhtml_Common_Component_Abstract extends Ess_
         return $tab;
     }
 
-    // ########################################
+    //########################################
 
     protected function getSingleBlock()
     {
@@ -233,7 +236,7 @@ abstract class Ess_M2ePro_Block_Adminhtml_Common_Component_Abstract extends Ess_
         return $this->getTabBlockById($tabId);
     }
 
-    // ########################################
+    //########################################
 
     /**
      * @abstract
@@ -257,7 +260,7 @@ abstract class Ess_M2ePro_Block_Adminhtml_Common_Component_Abstract extends Ess_
         return $this->getBuyTabBlock()->toHtml();
     }
 
-    // ########################################
+    //########################################
 
     /**
      * @return Ess_M2ePro_Block_Adminhtml_Common_Component_Tabs
@@ -276,7 +279,7 @@ abstract class Ess_M2ePro_Block_Adminhtml_Common_Component_Abstract extends Ess_
         return '<div id="'.$this->tabsContainerId.'"></div>';
     }
 
-    // ########################################
+    //########################################
 
     protected function getActiveTab()
     {
@@ -289,5 +292,5 @@ abstract class Ess_M2ePro_Block_Adminhtml_Common_Component_Abstract extends Ess_
         return $activeTab;
     }
 
-    // ########################################
+    //########################################
 }

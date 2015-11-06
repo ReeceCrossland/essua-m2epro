@@ -1,40 +1,49 @@
 <?php
 
 /*
- * @copyright  Copyright (c) 2013 by  ESS-UA.
+ * @author     M2E Pro Developers Team
+ * @copyright  2011-2015 ESS-UA [M2E Pro]
+ * @license    Commercial use is forbidden
  */
 
 class Ess_M2ePro_Block_Adminhtml_Development_Inspection_Installation
     extends Ess_M2ePro_Block_Adminhtml_Development_Inspection_Abstract
 {
     public $lastVersion;
-    public $installationVersionHistory;
+    public $installationVersionHistory = array();
 
-    // ########################################
+    //########################################
 
     public function __construct()
     {
         parent::__construct();
 
         // Initialization block
-        //------------------------------
+        // ---------------------------------------
         $this->setId('developmentInspectionInstallation');
-        //------------------------------
+        // ---------------------------------------
 
         $this->setTemplate('M2ePro/development/inspection/installation.phtml');
 
         $this->prepareInfo();
     }
 
-    // ########################################
+    //########################################
 
     protected function prepareInfo()
     {
         $cacheConfig = Mage::helper('M2ePro/Module')->getCacheConfig();
         $this->latestVersion = $cacheConfig->getGroupValue('/installation/', 'last_version');
-        $this->installationVersionHistory = Mage::getModel('M2ePro/Registry')
-                                                ->load('/installation/versions_history/', 'key')
-                                                ->getValueFromJson();
+
+        $registryModel = Mage::getModel('M2ePro/Registry');
+        $structureHelper = Mage::helper('M2ePro/Module_Database_Structure');
+
+        if ($structureHelper->isTableExists($registryModel->getResource()->getMainTable())) {
+
+            $this->installationVersionHistory = $registryModel
+                    ->load('/installation/versions_history/', 'key')
+                    ->getValueFromJson();
+        }
 
         $this->latestUpgradeDate        = false;
         $this->latestUpgradeFromVersion = '--';
@@ -70,5 +79,5 @@ class Ess_M2ePro_Block_Adminhtml_Development_Inspection_Installation
         return true;
     }
 
-    // ########################################
+    //########################################
 }

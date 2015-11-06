@@ -1,7 +1,9 @@
 <?php
 
 /*
- * @copyright  Copyright (c) 2013 by  ESS-UA.
+ * @author     M2E Pro Developers Team
+ * @copyright  2011-2015 ESS-UA [M2E Pro]
+ * @license    Commercial use is forbidden
  */
 
 class Ess_M2ePro_Model_Amazon_Order_Builder extends Mage_Core_Model_Abstract
@@ -16,7 +18,7 @@ class Ess_M2ePro_Model_Amazon_Order_Builder extends Mage_Core_Model_Abstract
     // M2ePro_TRANSLATIONS
     // Duplicated Amazon orders with ID #%id%.
 
-    // ########################################
+    //########################################
 
     /** @var $helper Ess_M2ePro_Model_Amazon_Order_Helper */
     private $helper = NULL;
@@ -33,14 +35,14 @@ class Ess_M2ePro_Model_Amazon_Order_Builder extends Mage_Core_Model_Abstract
 
     private $updates = array();
 
-    // ########################################
+    //########################################
 
     public function __construct()
     {
         $this->helper = Mage::getSingleton('M2ePro/Amazon_Order_Helper');
     }
 
-    // ########################################
+    //########################################
 
     public function initialize(Ess_M2ePro_Model_Account $account, array $data = array())
     {
@@ -50,12 +52,12 @@ class Ess_M2ePro_Model_Amazon_Order_Builder extends Mage_Core_Model_Abstract
         $this->initializeOrder();
     }
 
-    // ########################################
+    //########################################
 
     private function initializeData(array $data = array())
     {
         // Init general data
-        // ------------------
+        // ---------------------------------------
         $this->setData('account_id', $this->account->getId());
         $this->setData('amazon_order_id', $data['amazon_order_id']);
         $this->setData('marketplace_id', $data['marketplace_id']);
@@ -65,31 +67,32 @@ class Ess_M2ePro_Model_Amazon_Order_Builder extends Mage_Core_Model_Abstract
 
         $this->setData('purchase_update_date', $data['purchase_update_date']);
         $this->setData('purchase_create_date', $data['purchase_create_date']);
-        // ------------------
+        // ---------------------------------------
 
         // Init sale data
-        // ------------------
+        // ---------------------------------------
         $this->setData('paid_amount', (float)$data['paid_amount']);
         $this->setData('tax_details', json_encode($data['tax_details']));
         $this->setData('discount_details', json_encode($data['discount_details']));
         $this->setData('currency', $data['currency']);
         $this->setData('qty_shipped', $data['qty_shipped']);
         $this->setData('qty_unshipped', $data['qty_unshipped']);
-        // ------------------
+        // ---------------------------------------
 
         // Init customer/shipping data
-        // ------------------
+        // ---------------------------------------
         $this->setData('buyer_name', $data['buyer_name']);
         $this->setData('buyer_email', $data['buyer_email']);
         $this->setData('shipping_service', $data['shipping_service']);
         $this->setData('shipping_address', $data['shipping_address']);
         $this->setData('shipping_price', (float)$data['shipping_price']);
-        // ------------------
+        $this->setData('shipping_dates', json_encode($data['shipping_dates']));
+        // ---------------------------------------
 
         $this->items = $data['items'];
     }
 
-    // ########################################
+    //########################################
 
     private function initializeOrder()
     {
@@ -104,7 +107,7 @@ class Ess_M2ePro_Model_Amazon_Order_Builder extends Mage_Core_Model_Abstract
         $existOrdersNumber = count($existOrders);
 
         // duplicated M2ePro orders. remove m2e order without magento order id or newest order
-        // --------------------
+        // ---------------------------------------
         if ($existOrdersNumber > 1) {
             $isDeleted = false;
 
@@ -127,10 +130,10 @@ class Ess_M2ePro_Model_Amazon_Order_Builder extends Mage_Core_Model_Abstract
                 $orderForRemove->deleteInstance();
             }
         }
-        // --------------------
+        // ---------------------------------------
 
         // New order
-        // --------------------
+        // ---------------------------------------
         if ($existOrdersNumber == 0) {
             $this->status = self::STATUS_NEW;
             $this->order = Mage::helper('M2ePro/Component_Amazon')->getModel('Order');
@@ -138,21 +141,24 @@ class Ess_M2ePro_Model_Amazon_Order_Builder extends Mage_Core_Model_Abstract
 
             return;
         }
-        // --------------------
+        // ---------------------------------------
 
         // Already exist order
-        // --------------------
+        // ---------------------------------------
         $this->order = reset($existOrders);
         $this->status = self::STATUS_UPDATED;
 
         if (is_null($this->order->getMagentoOrderId())) {
             $this->order->setStatusUpdateRequired(true);
         }
-        // --------------------
+        // ---------------------------------------
     }
 
-    // ########################################
+    //########################################
 
+    /**
+     * @return Ess_M2ePro_Model_Order
+     */
     public function process()
     {
         $this->checkUpdates();
@@ -160,7 +166,9 @@ class Ess_M2ePro_Model_Amazon_Order_Builder extends Mage_Core_Model_Abstract
         $this->createOrUpdateOrder();
         $this->createOrUpdateItems();
 
-        if ($this->isNew()) {
+        if ($this->isNew() && !$this->getData('is_afn_channel') &&
+            $this->getData('status') != Ess_M2ePro_Model_Amazon_Order::STATUS_CANCELED
+        ) {
             $this->processListingsProductsUpdates();
             $this->processOtherListingsUpdates();
         }
@@ -172,7 +180,7 @@ class Ess_M2ePro_Model_Amazon_Order_Builder extends Mage_Core_Model_Abstract
         return $this->order;
     }
 
-    // ########################################
+    //########################################
 
     private function createOrUpdateItems()
     {
@@ -194,7 +202,7 @@ class Ess_M2ePro_Model_Amazon_Order_Builder extends Mage_Core_Model_Abstract
         }
     }
 
-    // ########################################
+    //########################################
 
     /**
      * @return bool
@@ -212,7 +220,7 @@ class Ess_M2ePro_Model_Amazon_Order_Builder extends Mage_Core_Model_Abstract
         return $this->status == self::STATUS_UPDATED;
     }
 
-    // ########################################
+    //########################################
 
     /**
      * @return Ess_M2ePro_Model_Order
@@ -231,7 +239,7 @@ class Ess_M2ePro_Model_Amazon_Order_Builder extends Mage_Core_Model_Abstract
         $this->order->setAccount($this->account);
     }
 
-    // ########################################
+    //########################################
 
     private function checkUpdates()
     {
@@ -268,7 +276,7 @@ class Ess_M2ePro_Model_Amazon_Order_Builder extends Mage_Core_Model_Abstract
         return filter_var($newEmail, FILTER_VALIDATE_EMAIL) !== false;
     }
 
-    // ########################################
+    //########################################
 
     private function hasUpdates()
     {
@@ -330,7 +338,7 @@ class Ess_M2ePro_Model_Amazon_Order_Builder extends Mage_Core_Model_Abstract
         $magentoOrderUpdater->finishUpdate();
     }
 
-    // ########################################
+    //########################################
 
     private function processListingsProductsUpdates()
     {
@@ -344,8 +352,10 @@ class Ess_M2ePro_Model_Amazon_Order_Builder extends Mage_Core_Model_Abstract
         foreach ($this->items as $orderItem) {
             /** @var Ess_M2ePro_Model_Mysql4_Listing_Product_Collection $listingProductCollection */
             $listingProductCollection = Mage::helper('M2ePro/Component_Amazon')->getCollection('Listing_Product');
-            $listingProductCollection->join(
-                array('l' => 'M2ePro/Listing'), 'main_table.listing_id=l.id', array('account_id')
+            $listingProductCollection->getSelect()->join(
+                array('l' => Mage::getModel('M2ePro/Listing')->getResource()->getMainTable()),
+                'main_table.listing_id=l.id',
+                array('account_id')
             );
             $listingProductCollection->addFieldToFilter('sku', $orderItem['sku']);
             $listingProductCollection->addFieldToFilter('l.account_id', $this->account->getId());
@@ -364,6 +374,11 @@ class Ess_M2ePro_Model_Amazon_Order_Builder extends Mage_Core_Model_Abstract
 
                 /** @var Ess_M2ePro_Model_Amazon_Listing_Product $amazonListingProduct */
                 $amazonListingProduct = $listingProduct->getChildObject();
+
+                if ($amazonListingProduct->isAfnChannel()) {
+                    continue;
+                }
+
                 $variationManager = $amazonListingProduct->getVariationManager();
 
                 if ($variationManager->isRelationChildType()) {
@@ -379,15 +394,14 @@ class Ess_M2ePro_Model_Amazon_Order_Builder extends Mage_Core_Model_Abstract
 
                 if ($currentOnlineQty > $orderItem['qty_purchased']) {
                     $listingProduct->setData('online_qty', $currentOnlineQty - $orderItem['qty_purchased']);
-                    $listingProduct->save();
 
-                    continue;
-                }
-
-                $listingProduct->setData('online_qty', 0);
-
-                if (!$listingProduct->isStopped()) {
-                    $listingProduct->setData('status', Ess_M2ePro_Model_Listing_Product::STATUS_STOPPED);
+                    // M2ePro_TRANSLATIONS
+                    // Item QTY was successfully changed from %from% to %to% .
+                    $tempLogMessage = Mage::helper('M2ePro')->__(
+                        'Item QTY was successfully changed from %from% to %to% .',
+                        $currentOnlineQty,
+                        ($currentOnlineQty - $orderItem['qty_purchased'])
+                    );
 
                     $logger->addProductMessage(
                         $listingProduct->getListingId(),
@@ -395,10 +409,52 @@ class Ess_M2ePro_Model_Amazon_Order_Builder extends Mage_Core_Model_Abstract
                         $listingProduct->getId(),
                         Ess_M2ePro_Helper_Data::INITIATOR_EXTENSION,
                         $logsActionId,
-                        Ess_M2ePro_Model_Listing_Log::ACTION_CHANGE_STATUS_ON_CHANNEL,
+                        Ess_M2ePro_Model_Listing_Log::ACTION_CHANNEL_CHANGE,
+                        $tempLogMessage,
+                        Ess_M2ePro_Model_Log_Abstract::TYPE_SUCCESS,
+                        Ess_M2ePro_Model_Log_Abstract::PRIORITY_LOW
+                    );
+
+                    $listingProduct->save();
+
+                    continue;
+                }
+
+                $listingProduct->setData('online_qty', 0);
+
+                $tempLogMessages = array(Mage::helper('M2ePro')->__(
+                    'Item QTY was successfully changed from %from% to %to% .',
+                    $currentOnlineQty, 0
+                ));
+
+                if (!$listingProduct->isStopped()) {
+                    $statusChangedFrom = Mage::helper('M2ePro/Component_Amazon')
+                        ->getHumanTitleByListingProductStatus($listingProduct->getStatus());
+                    $statusChangedTo = Mage::helper('M2ePro/Component_Amazon')
+                        ->getHumanTitleByListingProductStatus(Ess_M2ePro_Model_Listing_Product::STATUS_STOPPED);
+
+                    if (!empty($statusChangedFrom) && !empty($statusChangedTo)) {
                         // M2ePro_TRANSLATIONS
-                        // Item status was successfully changed to "Inactive".
-                        'Item status was successfully changed to "Inactive".',
+                        // Item Status was successfully changed from "%from%" to "%to%" .
+                        $tempLogMessages[] = Mage::helper('M2ePro')->__(
+                            'Item Status was successfully changed from "%from%" to "%to%" .',
+                            $statusChangedFrom,
+                            $statusChangedTo
+                        );
+                    }
+
+                    $listingProduct->setData('status', Ess_M2ePro_Model_Listing_Product::STATUS_STOPPED);
+                }
+
+                foreach ($tempLogMessages as $tempLogMessage) {
+                    $logger->addProductMessage(
+                        $listingProduct->getListingId(),
+                        $listingProduct->getProductId(),
+                        $listingProduct->getId(),
+                        Ess_M2ePro_Helper_Data::INITIATOR_EXTENSION,
+                        $logsActionId,
+                        Ess_M2ePro_Model_Listing_Log::ACTION_CHANNEL_CHANGE,
+                        $tempLogMessage,
                         Ess_M2ePro_Model_Log_Abstract::TYPE_SUCCESS,
                         Ess_M2ePro_Model_Log_Abstract::PRIORITY_LOW
                     );
@@ -444,10 +500,36 @@ class Ess_M2ePro_Model_Amazon_Order_Builder extends Mage_Core_Model_Abstract
                     continue;
                 }
 
+                /** @var Ess_M2ePro_Model_Amazon_Listing_Other $amazonOtherListing */
+                $amazonOtherListing = $otherListing->getChildObject();
+
+                if ($amazonOtherListing->isAfnChannel()) {
+                    continue;
+                }
+
                 $currentOnlineQty = $otherListing->getData('online_qty');
 
                 if ($currentOnlineQty > $orderItem['qty_purchased']) {
                     $otherListing->setData('online_qty', $currentOnlineQty - $orderItem['qty_purchased']);
+
+                    // M2ePro_TRANSLATIONS
+                    // Item QTY was successfully changed from %from% to %to% .
+                    $tempLogMessage = Mage::helper('M2ePro')->__(
+                        'Item QTY was successfully changed from %from% to %to% .',
+                        $currentOnlineQty,
+                        ($currentOnlineQty - $orderItem['qty_purchased'])
+                    );
+
+                    $logger->addProductMessage(
+                        $otherListing->getId(),
+                        Ess_M2ePro_Helper_Data::INITIATOR_EXTENSION,
+                        $logsActionId,
+                        Ess_M2ePro_Model_Listing_Other_Log::ACTION_CHANNEL_CHANGE,
+                        $tempLogMessage,
+                        Ess_M2ePro_Model_Log_Abstract::TYPE_SUCCESS,
+                        Ess_M2ePro_Model_Log_Abstract::PRIORITY_LOW
+                    );
+
                     $otherListing->save();
 
                     continue;
@@ -455,17 +537,36 @@ class Ess_M2ePro_Model_Amazon_Order_Builder extends Mage_Core_Model_Abstract
 
                 $otherListing->setData('online_qty', 0);
 
-                if (!$otherListing->isStopped()) {
-                    $otherListing->setData('status', Ess_M2ePro_Model_Listing_Product::STATUS_STOPPED);
+                $tempLogMessages = array(Mage::helper('M2ePro')->__(
+                    'Item qty was successfully changed from %from% to %to% .',
+                    $currentOnlineQty, 0
+                ));
 
+                if (!$otherListing->isStopped()) {
+                    $statusChangedFrom = Mage::helper('M2ePro/Component_Amazon')
+                        ->getHumanTitleByListingProductStatus($otherListing->getStatus());
+                    $statusChangedTo = Mage::helper('M2ePro/Component_Amazon')
+                        ->getHumanTitleByListingProductStatus(Ess_M2ePro_Model_Listing_Product::STATUS_STOPPED);
+
+                    if (!empty($statusChangedFrom) && !empty($statusChangedTo)) {
+                        // M2ePro_TRANSLATIONS
+                        // Item Status was successfully changed from "%from%" to "%to%" .
+                        $tempLogMessages[] = Mage::helper('M2ePro')->__(
+                            'Item Status was successfully changed from "%from%" to "%to%" .',
+                            $statusChangedFrom, $statusChangedTo
+                        );
+                    }
+
+                    $otherListing->setData('status', Ess_M2ePro_Model_Listing_Product::STATUS_STOPPED);
+                }
+
+                foreach ($tempLogMessages as $tempLogMessage) {
                     $logger->addProductMessage(
                         $otherListing->getId(),
                         Ess_M2ePro_Helper_Data::INITIATOR_EXTENSION,
                         $logsActionId,
-                        Ess_M2ePro_Model_Listing_Other_Log::ACTION_CHANGE_STATUS_ON_CHANNEL,
-                        // M2ePro_TRANSLATIONS
-                        // Item status was successfully changed to "Inactive".
-                        'Item status was successfully changed to "Inactive".',
+                        Ess_M2ePro_Model_Listing_Other_Log::ACTION_CHANNEL_CHANGE,
+                        $tempLogMessage,
                         Ess_M2ePro_Model_Log_Abstract::TYPE_SUCCESS,
                         Ess_M2ePro_Model_Log_Abstract::PRIORITY_LOW
                     );
@@ -476,5 +577,5 @@ class Ess_M2ePro_Model_Amazon_Order_Builder extends Mage_Core_Model_Abstract
         }
     }
 
-    // ########################################
+    //########################################
 }

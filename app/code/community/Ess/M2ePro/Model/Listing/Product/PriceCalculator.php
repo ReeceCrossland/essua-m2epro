@@ -1,13 +1,13 @@
 <?php
 
 /*
- * @copyright  Copyright (c) 2015 by  ESS-UA.
+ * @author     M2E Pro Developers Team
+ * @copyright  2011-2015 ESS-UA [M2E Pro]
+ * @license    Commercial use is forbidden
  */
 
 abstract class Ess_M2ePro_Model_Listing_Product_PriceCalculator
 {
-    // ########################################
-
     /**
      * @var null|array
      */
@@ -28,7 +28,7 @@ abstract class Ess_M2ePro_Model_Listing_Product_PriceCalculator
      */
     private $productValueCache = NULL;
 
-    // ########################################
+    //########################################
 
     /**
      * @param array $source
@@ -43,19 +43,19 @@ abstract class Ess_M2ePro_Model_Listing_Product_PriceCalculator
     /**
      * @param null|string $key
      * @return array|mixed
-     * @throws LogicException
+     * @throws Ess_M2ePro_Model_Exception_Logic
      */
     protected function getSource($key = NULL)
     {
         if (empty($this->source)) {
-            throw new LogicException('Initialize all parameters first.');
+            throw new Ess_M2ePro_Model_Exception_Logic('Initialize all parameters first.');
         }
 
         return (!is_null($key) && isset($this->source[$key])) ?
                 $this->source[$key] : $this->source;
     }
 
-    // ----------------------------------------
+    // ---------------------------------------
 
     /**
      * @param Ess_M2ePro_Model_Listing_Product $product
@@ -69,18 +69,18 @@ abstract class Ess_M2ePro_Model_Listing_Product_PriceCalculator
 
     /**
      * @return Ess_M2ePro_Model_Listing_Product
-     * @throws LogicException
+     * @throws Ess_M2ePro_Model_Exception_Logic
      */
     protected function getProduct()
     {
         if (is_null($this->product)) {
-            throw new LogicException('Initialize all parameters first.');
+            throw new Ess_M2ePro_Model_Exception_Logic('Initialize all parameters first.');
         }
 
         return $this->product;
     }
 
-    // ----------------------------------------
+    // ---------------------------------------
 
     /**
      * @param bool $value
@@ -100,7 +100,7 @@ abstract class Ess_M2ePro_Model_Listing_Product_PriceCalculator
         return $this->modifyByCoefficient;
     }
 
-    // ########################################
+    //########################################
 
     /**
      * @return Ess_M2ePro_Model_Listing
@@ -118,7 +118,7 @@ abstract class Ess_M2ePro_Model_Listing_Product_PriceCalculator
         return $this->getListing()->getChildObject();
     }
 
-    // ----------------------------------------
+    // ---------------------------------------
 
     /**
      * @return Ess_M2ePro_Model_Template_SellingFormat
@@ -136,7 +136,7 @@ abstract class Ess_M2ePro_Model_Listing_Product_PriceCalculator
         return $this->getSellingFormatTemplate()->getChildObject();
     }
 
-    // ----------------------------------------
+    // ---------------------------------------
 
     /**
      * @return Ess_M2ePro_Model_Component_Child_Abstract
@@ -154,7 +154,7 @@ abstract class Ess_M2ePro_Model_Listing_Product_PriceCalculator
         return $this->getProduct()->getMagentoProduct();
     }
 
-    // ########################################
+    //########################################
 
     public function getProductValue()
     {
@@ -176,7 +176,7 @@ abstract class Ess_M2ePro_Model_Listing_Product_PriceCalculator
         return $this->prepareFinalValue($value);
     }
 
-    // ########################################
+    //########################################
 
     protected function getProductBaseValue()
     {
@@ -250,7 +250,7 @@ abstract class Ess_M2ePro_Model_Listing_Product_PriceCalculator
                 break;
 
             default:
-                throw new LogicException('Unknown Mode in Database.');
+                throw new Ess_M2ePro_Model_Exception_Logic('Unknown Mode in Database.');
         }
 
         $value < 0 && $value = 0;
@@ -269,7 +269,7 @@ abstract class Ess_M2ePro_Model_Listing_Product_PriceCalculator
         } else if ($this->getMagentoProduct()->isGroupedType()) {
             $value = $this->getGroupedVariationValue($variation);
         } else {
-            throw new LogicException('Unknown Product type.');
+            throw new Ess_M2ePro_Model_Exception_Logic('Unknown Product type.');
         }
 
         $value < 0 && $value = 0;
@@ -294,7 +294,7 @@ abstract class Ess_M2ePro_Model_Listing_Product_PriceCalculator
                 break;
 
             default:
-                throw new LogicException('Unknown Mode in Database.');
+                throw new Ess_M2ePro_Model_Exception_Logic('Unknown Mode in Database.');
         }
 
         $value < 0 && $value = 0;
@@ -302,7 +302,7 @@ abstract class Ess_M2ePro_Model_Listing_Product_PriceCalculator
         return $value;
     }
 
-    // ########################################
+    //########################################
 
     protected function getConfigurableVariationValue(
         Ess_M2ePro_Model_Listing_Product_Variation $variation)
@@ -331,6 +331,10 @@ abstract class Ess_M2ePro_Model_Listing_Product_PriceCalculator
             $value = 0;
 
             foreach ($variation->getOptions(true) as $option) {
+                if (!$option->getProductId()) {
+                    continue;
+                }
+
                 $value += $this->getOptionBaseValue($option);
             }
 
@@ -349,8 +353,9 @@ abstract class Ess_M2ePro_Model_Listing_Product_PriceCalculator
             $value = 0;
 
             foreach ($variation->getOptions(true) as $option) {
-
-                /** @var $option Ess_M2ePro_Model_Listing_Product_Variation_Option */
+                if (!$option->getProductId()) {
+                    continue;
+                }
 
                 $tempValue = (float)$option->getMagentoProduct()->getSpecialPrice();
                 $tempValue <= 0 && $tempValue = (float)$option->getMagentoProduct()->getPrice();
@@ -380,7 +385,7 @@ abstract class Ess_M2ePro_Model_Listing_Product_PriceCalculator
         return $this->getOptionBaseValue(reset($options));
     }
 
-    // ########################################
+    //########################################
 
     protected function applyAdditionalOptionValuesModifications(
         Ess_M2ePro_Model_Listing_Product_Variation $variation, $value)
@@ -391,7 +396,7 @@ abstract class Ess_M2ePro_Model_Listing_Product_PriceCalculator
                 $value += $this->getConfigurableAdditionalOptionValue($option);
             } else if ($this->getMagentoProduct()->isSimpleType()) {
                 $value += $this->getSimpleWithCustomOptionsAdditionalOptionValue($option);
-            } else if ($this->getMagentoProduct()->isBundleType()) {
+            } else if ($this->getMagentoProduct()->isBundleType() && $option->getProductId()) {
                 $value += $this->getBundleAdditionalOptionValue($option);
             }
         }
@@ -399,7 +404,7 @@ abstract class Ess_M2ePro_Model_Listing_Product_PriceCalculator
         return $value;
     }
 
-    // ----------------------------------------
+    // ---------------------------------------
 
     protected function getConfigurableAdditionalOptionValue(
         Ess_M2ePro_Model_Listing_Product_Variation_Option $option)
@@ -425,7 +430,7 @@ abstract class Ess_M2ePro_Model_Listing_Product_PriceCalculator
             $tempAttributeNames[] = $configurableAttribute->getData('label');
             $tempAttributeNames[] = $attribute->getFrontendLabel();
 
-            if (!in_array($attributeName,array_map('strtolower',array_filter($tempAttributeNames)))){
+            if (!in_array($attributeName,array_map('strtolower',array_filter($tempAttributeNames)))) {
                 continue;
             }
 
@@ -452,7 +457,7 @@ abstract class Ess_M2ePro_Model_Listing_Product_PriceCalculator
                 $tempOptionNames = array_map('strtolower', array_filter($tempOptionNames));
                 $tempOptionNames = $this->prepareOptionTitles($tempOptionNames);
 
-                if (!in_array($optionName, $tempOptionNames)){
+                if (!in_array($optionName, $tempOptionNames)) {
                     continue;
                 }
 
@@ -513,7 +518,7 @@ abstract class Ess_M2ePro_Model_Listing_Product_PriceCalculator
                 $tempOptionTitles = array_map('strtolower', array_filter($tempOptionTitles));
                 $tempOptionTitles = $this->prepareOptionTitles($tempOptionTitles);
 
-                if (!in_array($optionName, $tempOptionTitles )) {
+                if (!in_array($optionName, $tempOptionTitles)) {
                     continue;
                 }
 
@@ -597,7 +602,7 @@ abstract class Ess_M2ePro_Model_Listing_Product_PriceCalculator
         return $value;
     }
 
-    // ########################################
+    //########################################
 
     protected function getExistedProductValue(Ess_M2ePro_Model_Magento_Product $product)
     {
@@ -616,7 +621,7 @@ abstract class Ess_M2ePro_Model_Listing_Product_PriceCalculator
         return $this->convertValueFromStoreToMarketplace($value);
     }
 
-    // ----------------------------------------
+    // ---------------------------------------
 
     protected function getGroupedProductValue(Ess_M2ePro_Model_Magento_Product $product)
     {
@@ -682,7 +687,7 @@ abstract class Ess_M2ePro_Model_Listing_Product_PriceCalculator
         return round((($value * $percent) / 100), 2);
     }
 
-    // ########################################
+    //########################################
 
     protected function prepareFinalValue($value)
     {
@@ -734,12 +739,12 @@ abstract class Ess_M2ePro_Model_Listing_Product_PriceCalculator
         return $this->getComponentListing()->convertPriceFromStoreToMarketplace($value);
     }
 
-    // ----------------------------------------
+    // ---------------------------------------
 
     protected function prepareOptionTitles($optionTitles)
     {
         return $optionTitles;
     }
 
-    // ########################################
+    //########################################
 }

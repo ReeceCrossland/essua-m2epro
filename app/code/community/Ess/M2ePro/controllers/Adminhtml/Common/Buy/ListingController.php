@@ -1,13 +1,15 @@
 <?php
 
 /*
- * @copyright  Copyright (c) 2013 by  ESS-UA.
+ * @author     M2E Pro Developers Team
+ * @copyright  2011-2015 ESS-UA [M2E Pro]
+ * @license    Commercial use is forbidden
  */
 
 class Ess_M2ePro_Adminhtml_Common_Buy_ListingController
     extends Ess_M2ePro_Controller_Adminhtml_Common_MainController
 {
-    //#############################################
+    //########################################
 
     protected function _initAction()
     {
@@ -49,15 +51,17 @@ class Ess_M2ePro_Adminhtml_Common_Buy_ListingController
 
         $this->_initPopUp();
 
+        $this->setPageHelpLink(Ess_M2ePro_Helper_Component_Buy::NICK, 'Edit+M2E+Pro+Listing+Settings');
+
         return $this;
     }
 
     protected function _isAllowed()
     {
-        return Mage::getSingleton('admin/session')->isAllowed('m2epro_common/listings/listing');
+        return Mage::getSingleton('admin/session')->isAllowed('m2epro_common/listings');
     }
 
-    //#############################################
+    //########################################
 
     public function indexAction()
     {
@@ -78,7 +82,7 @@ class Ess_M2ePro_Adminhtml_Common_Buy_ListingController
         $this->getResponse()->setBody($block->toHtml());
     }
 
-    //#############################################
+    //########################################
 
     public function searchAction()
     {
@@ -94,47 +98,7 @@ class Ess_M2ePro_Adminhtml_Common_Buy_ListingController
         $this->getResponse()->setBody($block->toHtml());
     }
 
-    //#############################################
-
-    public function getProductsFromCategoriesAction()
-    {
-        $hideProductsOthersListings = (bool)$this->getRequest()->getParam('hide_products_others_listings', true);
-        $listingId = $this->getRequest()->getParam('listing_id');
-        $listing = Mage::helper('M2ePro/Component_Buy')->getCachedObject('Listing',$listingId);
-
-        $categories = $this->getRequest()->getParam('categories');
-        $categoriesIds = explode(',', $categories);
-        $categoriesIds = array_unique($categoriesIds);
-
-        $categoriesSave = $this->getRequest()->getParam('categories_save');
-        if ($listing->isSourceProducts()) {
-            $categoriesSave = 0;
-        }
-
-        $oldCategories = $listing->getCategories();
-        $oldCategoriesIds = array();
-        foreach ($oldCategories as $oldCategory) {
-            $oldCategoriesIds[] = $oldCategory['category_id'];
-        }
-
-        $products = array();
-        foreach ($categoriesIds as $categoryId) {
-            if ($categoriesSave && !in_array($categoryId, $oldCategoriesIds)) {
-                Mage::getModel('M2ePro/Listing_Category')
-                    ->setData(array('listing_id'=>$listing->getId(),'category_id'=>$categoryId))
-                    ->save();
-            }
-
-            $tempProducts = $listing->getProductsFromCategory($categoryId,$hideProductsOthersListings);
-            !empty($tempProducts) && $products = array_merge($products, $tempProducts);
-        }
-
-        if (!empty($products)) {
-            echo implode(',', $products);
-        }
-    }
-
-    //#############################################
+    //########################################
 
     public function viewAction()
     {
@@ -160,24 +124,26 @@ class Ess_M2ePro_Adminhtml_Common_Buy_ListingController
         }
 
         // Check listing lock object
-        //----------------------------
+        // ---------------------------------------
         if ($model->isLockedObject('products_in_action')) {
             $this->_getSession()->addNotice(
                 Mage::helper('M2ePro')->__('Some Rakuten.com request(s) are being processed now.')
             );
         }
-        //----------------------------
+        // ---------------------------------------
 
         Mage::helper('M2ePro/Data_Global')->setValue('temp_data', $model->getData());
         Mage::helper('M2ePro/Data_Global')->setValue('marketplace_id', $model->getMarketplaceId());
 
         // Set rule model
-        // ---------------------------
+        // ---------------------------------------
         $this->setRuleData('buy_rule_listing_view');
-        // ---------------------------
+        // ---------------------------------------
 
-        $this->_initAction()
-            ->_addContent($this->getLayout()->createBlock('M2ePro/adminhtml_common_buy_listing_view'))
+        $this->_initAction();
+        $this->setPageHelpLink(Ess_M2ePro_Helper_Component_Buy::NICK, 'Manage+M2E+Pro+Listings');
+
+        $this->_addContent($this->getLayout()->createBlock('M2ePro/adminhtml_common_buy_listing_view'))
             ->renderLayout();
     }
 
@@ -189,16 +155,16 @@ class Ess_M2ePro_Adminhtml_Common_Buy_ListingController
         Mage::helper('M2ePro/Data_Global')->setValue('temp_data', $model->getData());
 
         // Set rule model
-        // ---------------------------
+        // ---------------------------------------
         $this->setRuleData('buy_rule_listing_view');
-        // ---------------------------
+        // ---------------------------------------
 
         $response = $this->loadLayout()->getLayout()
             ->createBlock('M2ePro/adminhtml_common_buy_listing_view_grid')->toHtml();
         $this->getResponse()->setBody($response);
     }
 
-    //#############################################
+    //########################################
 
     public function editAction()
     {
@@ -234,59 +200,36 @@ class Ess_M2ePro_Adminhtml_Common_Buy_ListingController
         $oldData = $model->getDataSnapshot();
 
         // Base prepare
-        //--------------------
+        // ---------------------------------------
         $data = array();
-        //--------------------
+        // ---------------------------------------
 
         // tab: settings
-        //--------------------
+        // ---------------------------------------
         $keys = array(
-            'title',
             'template_selling_format_id',
             'template_synchronization_id',
-
-            'categories_add_action',
-            'categories_delete_action'
         );
         foreach ($keys as $key) {
             if (isset($post[$key])) {
                 $data[$key] = $post[$key];
             }
         }
-        //--------------------
+        // ---------------------------------------
 
         $model->addData($data)->save();
-
-        // Delete old categories
-        //---------------
-        $oldCategories = (array)$model->getCategories(true);
-        foreach ($oldCategories as $oldCategory) {
-            $oldCategory->deleteInstance();
-        }
-
-        // Save selected categories
-        //---------------
-        if (!empty($post['selected_categories'])) {
-            $categoriesIds = explode(',',$post['selected_categories']);
-            $categoriesIds = array_unique($categoriesIds);
-
-            foreach ($categoriesIds as $categoryId) {
-                Mage::getModel('M2ePro/Listing_Category')
-                    ->setData(array('listing_id'=> $id,'category_id'=>(int)$categoryId))
-                    ->save();
-            }
-        }
-        //---------------
 
         $templateData = array();
 
         // tab: channel settings
-        //---------------
+        // ---------------------------------------
         $keys = array(
             'account_id',
 
             'sku_mode',
             'sku_custom_attribute',
+            'sku_modification_mode',
+            'sku_modification_custom_value',
             'generate_sku_mode',
 
             'general_id_mode',
@@ -324,7 +267,7 @@ class Ess_M2ePro_Adminhtml_Common_Buy_ListingController
         }
 
         $templateData['marketplace_id'] = Mage::helper('M2ePro/Component_Buy')->getMarketplaceId();
-        //---------------
+        // ---------------------------------------
 
         $model->addData($templateData)->save();
         $newData = $model->getDataSnapshot();
@@ -368,7 +311,7 @@ class Ess_M2ePro_Adminhtml_Common_Buy_ListingController
         $this->_redirectUrl(Mage::helper('M2ePro')->getBackUrl());
     }
 
-    //#############################################
+    //########################################
 
     protected function processConnector($action, array $params = array())
     {
@@ -417,7 +360,7 @@ class Ess_M2ePro_Adminhtml_Common_Buy_ListingController
         );
     }
 
-    //---------------------------------------------
+    // ---------------------------------------
 
     public function runListProductsAction()
     {
@@ -454,7 +397,7 @@ class Ess_M2ePro_Adminhtml_Common_Buy_ListingController
         ));
     }
 
-    //#############################################
+    //########################################
 
     public function getSuggestedBuyComSkuGridAction()
     {
@@ -473,7 +416,7 @@ class Ess_M2ePro_Adminhtml_Common_Buy_ListingController
             Mage::helper('M2ePro/Data_Global')->setValue('product_id',$productId);
             Mage::helper('M2ePro/Data_Global')->setValue('is_suggestion',true);
             Mage::helper('M2ePro/Data_Global')->setValue('marketplace_id',$marketplaceId);
-            Mage::helper('M2ePro/Data_Global')->setValue('temp_data',$searchSettingsData['data']);
+            Mage::helper('M2ePro/Data_Global')->setValue('temp_data',$searchSettingsData);
             $response = $this->loadLayout()->getLayout()
                 ->createBlock('M2ePro/adminhtml_common_buy_listing_productSearch_grid')->toHtml();
         } else {
@@ -483,7 +426,7 @@ class Ess_M2ePro_Adminhtml_Common_Buy_ListingController
         $this->getResponse()->setBody($response);
     }
 
-    //--------------------------------------------
+    // ---------------------------------------
 
     public function searchBuyComSkuManualAction()
     {
@@ -520,7 +463,7 @@ class Ess_M2ePro_Adminhtml_Common_Buy_ListingController
                 return $this->getResponse()->setBody(json_encode($response));
             }
 
-            Mage::helper('M2ePro/Data_Global')->setValue('temp_data',$result['data']);
+            Mage::helper('M2ePro/Data_Global')->setValue('temp_data',$result);
             Mage::helper('M2ePro/Data_Global')->setValue('product_id',$productId);
             Mage::helper('M2ePro/Data_Global')->setValue('marketplace_id',$marketplaceObj->getId());
         } else {
@@ -575,12 +518,14 @@ class Ess_M2ePro_Adminhtml_Common_Buy_ListingController
         return $this->getResponse()->setBody('0');
     }
 
-    //--------------------------------------------
+    // ---------------------------------------
 
     public function mapToBuyComSkuAction()
     {
         $productId = $this->getRequest()->getParam('product_id');
         $generalId = $this->getRequest()->getParam('general_id');
+        $searchType  = $this->getRequest()->getParam('search_type');
+        $searchValue = $this->getRequest()->getParam('search_value');
 
         if (empty($productId) || empty($generalId)) {
             return $this->getResponse()->setBody('You should provide correct parameters.');
@@ -592,8 +537,20 @@ class Ess_M2ePro_Adminhtml_Common_Buy_ListingController
         if ($listingProduct->isNotListed() &&
             !$listingProduct->getData('template_new_product_id')
         ) {
+            if (!empty($searchType) && !empty($searchValue)) {
+                $generalIdSearchInfo = array(
+                    'is_set_automatic' => false,
+                    'type'  => $searchType,
+                    'value' => $searchValue,
+                );
+
+                $listingProduct->setSettings('general_id_search_info', $generalIdSearchInfo);
+            }
+
             $listingProduct->setData('general_id',$generalId);
             $listingProduct->setData('template_new_product_id',NULL);
+            $listingProduct->setData('search_settings_status',NULL);
+            $listingProduct->setData('search_settings_data',NULL);
 
             $listingProduct->save();
         }
@@ -632,7 +589,9 @@ class Ess_M2ePro_Adminhtml_Common_Buy_ListingController
 
             $listingProduct->setData('general_id',NULL);
             $listingProduct->setData('template_new_product_id',NULL);
+            $listingProduct->setData('general_id_search_info',NULL);
             $listingProduct->setData('search_settings_data',NULL);
+            $listingProduct->setData('search_settings_status',NULL);
 
             $listingProduct->save();
 
@@ -644,7 +603,7 @@ class Ess_M2ePro_Adminhtml_Common_Buy_ListingController
         )));
     }
 
-    //#############################################
+    //########################################
 
     protected function setRuleData($prefix)
     {
@@ -689,5 +648,5 @@ class Ess_M2ePro_Adminhtml_Common_Buy_ListingController
         return $prefix;
     }
 
-    //#############################################
+    //########################################
 }

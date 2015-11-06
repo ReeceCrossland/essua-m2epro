@@ -1,18 +1,18 @@
 <?php
 
 /*
- * @copyright  Copyright (c) 2013 by  ESS-UA.
+ * @author     M2E Pro Developers Team
+ * @copyright  2011-2015 ESS-UA [M2E Pro]
+ * @license    Commercial use is forbidden
  */
 
 class Ess_M2ePro_Block_Adminhtml_Common_listing_Search_Tabs extends Mage_Adminhtml_Block_Widget_Tabs
 {
-    // ########################################
-
     const TAB_ID_ALL    = 'all';
     const TAB_ID_AMAZON = 'amazon';
     const TAB_ID_BUY    = 'buy';
 
-    // ########################################
+    //########################################
 
     public function __construct()
     {
@@ -22,7 +22,7 @@ class Ess_M2ePro_Block_Adminhtml_Common_listing_Search_Tabs extends Mage_Adminht
         $this->setDestElementId('search_tabs_container');
     }
 
-    // ########################################
+    //########################################
 
     protected function _prepareLayout()
     {
@@ -44,7 +44,7 @@ class Ess_M2ePro_Block_Adminhtml_Common_listing_Search_Tabs extends Mage_Adminht
         return parent::_prepareLayout();
     }
 
-    // ########################################
+    //########################################
 
     protected function getAllTabBlock()
     {
@@ -66,13 +66,15 @@ class Ess_M2ePro_Block_Adminhtml_Common_listing_Search_Tabs extends Mage_Adminht
         return $tab;
     }
 
-    // ########################################
+    //########################################
 
     protected function getAmazonTabBlock()
     {
+        $title = Mage::helper('M2ePro/Component_Amazon')->getTitle();
+
         $tab = array(
-            'label' => Mage::helper('M2ePro')->__(Ess_M2ePro_Helper_Component_Amazon::TITLE),
-            'title' => Mage::helper('M2ePro')->__(Ess_M2ePro_Helper_Component_Amazon::TITLE)
+            'label' => $title,
+            'title' => $title
         );
 
         if ($this->getActiveChannelTab() == self::TAB_ID_AMAZON) {
@@ -88,13 +90,15 @@ class Ess_M2ePro_Block_Adminhtml_Common_listing_Search_Tabs extends Mage_Adminht
         return $tab;
     }
 
-    // ########################################
+    //########################################
 
     protected function getBuyTabBlock()
     {
+        $title = Mage::helper('M2ePro/Component_Buy')->getTitle();
+
         $tab = array(
-            'label' => Mage::helper('M2ePro')->__(Ess_M2ePro_Helper_Component_Buy::TITLE),
-            'title' => Mage::helper('M2ePro')->__(Ess_M2ePro_Helper_Component_Buy::TITLE)
+            'label' => $title,
+            'title' => $title
         );
 
         if ($this->getActiveChannelTab() == self::TAB_ID_BUY) {
@@ -110,7 +114,7 @@ class Ess_M2ePro_Block_Adminhtml_Common_listing_Search_Tabs extends Mage_Adminht
         return $tab;
     }
 
-    // ########################################
+    //########################################
 
     protected function getActiveChannelTab()
     {
@@ -123,5 +127,5 @@ class Ess_M2ePro_Block_Adminhtml_Common_listing_Search_Tabs extends Mage_Adminht
         return $activeTab;
     }
 
-    // ########################################
+    //########################################
 }

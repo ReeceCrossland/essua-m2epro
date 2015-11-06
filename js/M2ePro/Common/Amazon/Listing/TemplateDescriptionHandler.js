@@ -1,4 +1,4 @@
-AmazonListingTemplateDescriptionHandler = Class.create(ActionHandler, {
+CommonAmazonListingTemplateDescriptionHandler = Class.create(ActionHandler, {
 
     //----------------------------------
 
@@ -25,6 +25,10 @@ AmazonListingTemplateDescriptionHandler = Class.create(ActionHandler, {
     mapToTemplateDescription: function(el, templateId, mapToGeneralId)
     {
         var self = this;
+
+        if (!confirm(M2ePro.translator.translate('Are you sure?'))) {
+            return;
+        }
 
         new Ajax.Request(self.options.url.mapToTemplateDescription, {
             method: 'post',

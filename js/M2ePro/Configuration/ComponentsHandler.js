@@ -1,7 +1,11 @@
 ConfigurationComponentsHandler = Class.create();
 ConfigurationComponentsHandler.prototype = Object.extend(new CommonHandler(), {
 
-    //----------------------------------
+    // ---------------------------------------
+
+    componentsTitles: [],
+
+    // ---------------------------------------
 
     initialize: function()
     {
@@ -25,7 +29,7 @@ ConfigurationComponentsHandler.prototype = Object.extend(new CommonHandler(), {
         });
     },
 
-    //----------------------------------
+    // ---------------------------------------
 
     component_mode_change: function()
     {
@@ -57,6 +61,8 @@ ConfigurationComponentsHandler.prototype = Object.extend(new CommonHandler(), {
 
     updateDefaultComponentSelect: function()
     {
+        var self = this;
+
         var html       = '',
             selected   = '',
 
@@ -74,7 +80,7 @@ ConfigurationComponentsHandler.prototype = Object.extend(new CommonHandler(), {
                     : selected = '';
 
                 html += '<option value="' + nick + '"' + selected + '>' +
-                            M2ePro.php.constant('Ess_M2ePro_Helper_Component_' + nick[0].toUpperCase() + nick.slice(1) + '::TITLE') +
+                            self.componentsTitles[nick] +
                         '</option>';
             }
         });
@@ -82,5 +88,5 @@ ConfigurationComponentsHandler.prototype = Object.extend(new CommonHandler(), {
         $('view_common_component_default').innerHTML = html;
     }
 
-    //----------------------------------
+    // ---------------------------------------
 });

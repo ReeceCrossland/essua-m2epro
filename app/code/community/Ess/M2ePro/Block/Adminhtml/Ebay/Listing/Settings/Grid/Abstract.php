@@ -1,31 +1,31 @@
 <?php
 
 /*
- * @copyright  Copyright (c) 2013 by  ESS-UA.
+ * @author     M2E Pro Developers Team
+ * @copyright  2011-2015 ESS-UA [M2E Pro]
+ * @license    Commercial use is forbidden
  */
 
 abstract class Ess_M2ePro_Block_Adminhtml_Ebay_Listing_Settings_Grid_Abstract
     extends Ess_M2ePro_Block_Adminhtml_Magento_Product_Grid_Abstract
 {
-    // ####################################
-
     protected $listing = NULL;
 
-    // ####################################
+    //########################################
 
     public function __construct()
     {
         parent::__construct();
 
         // Initialization block
-        //------------------------------
+        // ---------------------------------------
         $this->setId('ebayListingSettingsGridAbstract');
-        //------------------------------
+        // ---------------------------------------
 
         $this->showAdvancedFilterProductsOption = false;
     }
 
-    // ####################################
+    //########################################
 
     /**
      * @return Ess_M2ePro_Model_Listing
@@ -55,7 +55,7 @@ abstract class Ess_M2ePro_Block_Adminhtml_Ebay_Listing_Settings_Grid_Abstract
         return $collection;
     }
 
-    // ####################################
+    //########################################
 
     protected function addColumns()
     {
@@ -279,21 +279,21 @@ abstract class Ess_M2ePro_Block_Adminhtml_Ebay_Listing_Settings_Grid_Abstract
         ));
     }
 
-    // ####################################
+    //########################################
 
     protected function _prepareMassaction()
     {
         // Set massaction identifiers
-        //--------------------------------
+        // ---------------------------------------
         $this->setMassactionIdField('listing_product_id');
         $this->setMassactionIdFieldOnlyIndexValue(true);
-        //--------------------------------
+        // ---------------------------------------
 
         // Set mass-action
-        //--------------------------------
+        // ---------------------------------------
         $this->_prepareMassactionGroup()
              ->_prepareMassactionItems();
-        //--------------------------------
+        // ---------------------------------------
 
         return parent::_prepareMassaction();
     }
@@ -334,7 +334,7 @@ abstract class Ess_M2ePro_Block_Adminhtml_Ebay_Listing_Settings_Grid_Abstract
         return $this;
     }
 
-    // ####################################
+    //########################################
 
     public function callbackColumnTitle($value, $row, $column, $isExport)
     {
@@ -351,7 +351,7 @@ abstract class Ess_M2ePro_Block_Adminhtml_Ebay_Listing_Settings_Grid_Abstract
         return $value;
     }
 
-    // ####################################
+    //########################################
 
     public function callbackColumnGeneralSettings($value, $row, $column, $isExport)
     {
@@ -414,7 +414,7 @@ HTML;
         return $html;
     }
 
-    // ####################################
+    //########################################
 
     public function callbackColumnSellingSettings($value, $row, $column, $isExport)
     {
@@ -462,7 +462,7 @@ HTML;
         return $html;
     }
 
-    // ####################################
+    //########################################
 
     public function callbackColumnSynchSettings($value, $row, $column, $isExport)
     {
@@ -494,7 +494,7 @@ HTML;
         return $html;
     }
 
-    // ####################################
+    //########################################
 
     protected function getGroupOrder()
     {
@@ -546,7 +546,7 @@ HTML;
         return $actions;
     }
 
-    // ####################################
+    //########################################
 
     protected function callbackFilterTitle($collection, $column)
     {
@@ -564,7 +564,7 @@ HTML;
         );
     }
 
-    // ####################################
+    //########################################
 
     protected function callbackFilterSettings($collection, $column)
     {
@@ -585,7 +585,7 @@ HTML;
         );
     }
 
-    // ####################################
+    //########################################
 
     protected function _toHtml()
     {
@@ -630,7 +630,7 @@ HTML;
         return parent::_toHtml() . $additionalJs . $commonJs;
     }
 
-    // ####################################
+    //########################################
 
     private function getGridIdsJson()
     {
@@ -648,5 +648,5 @@ HTML;
         return implode(',',$connRead->fetchCol($select));
     }
 
-    // ####################################
+    //########################################
 }

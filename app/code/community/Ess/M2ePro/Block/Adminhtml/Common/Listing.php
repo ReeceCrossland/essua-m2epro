@@ -1,26 +1,27 @@
 <?php
 
 /*
- * @copyright  Copyright (c) 2013 by  ESS-UA.
+ * @author     M2E Pro Developers Team
+ * @copyright  2011-2015 ESS-UA [M2E Pro]
+ * @license    Commercial use is forbidden
  */
 
 class Ess_M2ePro_Block_Adminhtml_Common_Listing extends Ess_M2ePro_Block_Adminhtml_Common_Component_Tabs_Container
 {
-
-    // ########################################
+    //########################################
 
     public function __construct()
     {
         parent::__construct();
 
         // Set header text
-        //------------------------------
+        // ---------------------------------------
         $this->_headerText = '';
-        //------------------------------
+        // ---------------------------------------
 
         $this->setTemplate(NULL);
 
-        //------------------------------
+        // ---------------------------------------
         $url = $this->getUrl(
             '*/adminhtml_common_log/listing'
         );
@@ -29,9 +30,9 @@ class Ess_M2ePro_Block_Adminhtml_Common_Listing extends Ess_M2ePro_Block_Adminht
             'onclick'   => 'CommonListingObj.viewLogs(\'' . $url . '\')',
             'class'     => 'button_link'
         ));
-        //------------------------------
+        // ---------------------------------------
 
-        //------------------------------
+        // ---------------------------------------
         $url = $this->getUrl('*/adminhtml_common_listing_create/index', array(
             'step' => '1',
             'clear' => 'yes'
@@ -41,19 +42,19 @@ class Ess_M2ePro_Block_Adminhtml_Common_Listing extends Ess_M2ePro_Block_Adminht
             'onclick'   => 'CommonListingObj.createListing(\'' . $url . '\')',
             'class'     => 'add'
         ));
-        //------------------------------
+        // ---------------------------------------
 
-        //------------------------------
+        // ---------------------------------------
         $this->tabsContainerId = 'listings_tabs_container';
         $this->useAjax = true;
         $this->tabsAjaxUrls = array(
             self::TAB_ID_AMAZON => $this->getUrl('*/adminhtml_common_amazon_listing/index'),
             self::TAB_ID_BUY    => $this->getUrl('*/adminhtml_common_buy_listing/index')
         );
-        //------------------------------
+        // ---------------------------------------
     }
 
-    // ########################################
+    //########################################
 
     protected function getTabsContainerBlock()
     {
@@ -61,7 +62,7 @@ class Ess_M2ePro_Block_Adminhtml_Common_Listing extends Ess_M2ePro_Block_Adminht
             ->setTemplate('M2ePro/common/component/tabs/linktabs.phtml')->setId('listing');
     }
 
-    // ########################################
+    //########################################
 
     protected function _toHtml()
     {
@@ -82,7 +83,7 @@ class Ess_M2ePro_Block_Adminhtml_Common_Listing extends Ess_M2ePro_Block_Adminht
         $constants = Mage::helper('M2ePro')
             ->getClassConstantAsJson('Ess_M2ePro_Helper_Component_'.ucfirst($this->getActiveTab()));
 
-        $ajax = (int)$this->getRequest()->isAjax();
+        $ajax = (int)$this->getRequest()->isXmlHttpRequest();
 
         $javascripts = <<<HTML
 
@@ -107,7 +108,7 @@ class Ess_M2ePro_Block_Adminhtml_Common_Listing extends Ess_M2ePro_Block_Adminht
             EditListingTitleObj.openPopup(el);
         }
 
-        EditListingTitleObj = new EditListingTitle();
+        EditListingTitleObj = new ListingEditListingTitle();
     };
 
     {$ajax} ? init() : Event.observe(window, 'load', init);
@@ -119,7 +120,7 @@ HTML;
         return parent::_toHtml() . $javascripts;
     }
 
-    // ########################################
+    //########################################
 
     protected function getAmazonTabBlock()
     {
@@ -132,7 +133,7 @@ HTML;
         return $this->getChild('amazon_tab');
     }
 
-    // ########################################
+    //########################################
 
     protected function getBuyTabBlock()
     {
@@ -145,7 +146,7 @@ HTML;
         return $this->getChild('buy_tab');
     }
 
-    // ########################################
+    //########################################
 
     protected function getTabHtmlById($id)
     {
@@ -191,7 +192,7 @@ HTML;
         $helpBlock = $this->getLayout()->createBlock('M2ePro/adminhtml_common_listing_help');
 
         return $helpBlock->toHtml() . <<<HTML
-<div class="content-header">
+<div class="content-header skip-header">
     <table cellspacing="0">
         <tr>
             <td{$hideChannels}>{$tabsContainer->toHtml()}</td>
@@ -204,7 +205,7 @@ HTML;
 
     }
 
-    // ########################################
+    //########################################
 
     protected function getActiveTab()
     {
@@ -217,5 +218,5 @@ HTML;
         return $activeTab;
     }
 
-    // ########################################
+    //########################################
 }

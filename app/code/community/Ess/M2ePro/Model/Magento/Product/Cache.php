@@ -1,16 +1,16 @@
 <?php
 
 /*
- * @copyright  Copyright (c) 2013 by  ESS-UA.
+ * @author     M2E Pro Developers Team
+ * @copyright  2011-2015 ESS-UA [M2E Pro]
+ * @license    Commercial use is forbidden
  */
 
 class Ess_M2ePro_Model_Magento_Product_Cache extends Ess_M2ePro_Model_Magento_Product
 {
-    // ########################################
-
     private $isCacheEnabled = false;
 
-    // ########################################
+    //########################################
 
     public function getCacheValue($key)
     {
@@ -36,33 +36,42 @@ class Ess_M2ePro_Model_Magento_Product_Cache extends Ess_M2ePro_Model_Magento_Pr
         );
     }
 
-    // ########################################
+    //########################################
 
+    /**
+     * @return bool
+     */
     public function isCacheEnabled()
     {
         return $this->isCacheEnabled;
     }
 
+    /**
+     * @return $this
+     */
     public function enableCache()
     {
         $this->isCacheEnabled = true;
         return $this;
     }
 
+    /**
+     * @return $this
+     */
     public function disableCache()
     {
         $this->isCacheEnabled = false;
         return $this;
     }
 
-    // ########################################
+    //########################################
 
     public function exists()
     {
         return $this->getMethodData(__FUNCTION__);
     }
 
-    // ########################################
+    //########################################
 
     /**
      * @return Mage_Catalog_Model_Product_Type_Abstract
@@ -82,63 +91,63 @@ class Ess_M2ePro_Model_Magento_Product_Cache extends Ess_M2ePro_Model_Magento_Pr
         return $this->getMethodData(__FUNCTION__);
     }
 
-    // ########################################
+    //########################################
 
     public function getTypeId()
     {
         return $this->getMethodData(__FUNCTION__);
     }
 
-    // ########################################
+    //########################################
 
     public function isSimpleTypeWithCustomOptions()
     {
         return $this->getMethodData(__FUNCTION__);
     }
 
-    // ########################################
+    //########################################
 
     public function getSku()
     {
         return $this->getMethodData(__FUNCTION__);
     }
 
-    // ########################################
+    //########################################
 
     public function getName()
     {
         return $this->getMethodData(__FUNCTION__);
     }
 
-    // ########################################
+    //########################################
 
     public function isStatusEnabled()
     {
         return $this->getMethodData(__FUNCTION__);
     }
 
-    // ########################################
+    //########################################
 
     public function isStockAvailability()
     {
         return $this->getMethodData(__FUNCTION__);
     }
 
-    // ########################################
+    //########################################
 
     public function getPrice()
     {
         return $this->getMethodData(__FUNCTION__);
     }
 
-    // ########################################
+    //########################################
 
     public function getSpecialPrice()
     {
         return $this->getMethodData(__FUNCTION__);
     }
 
-    // ########################################
+    //########################################
 
     public function getQty($lifeMode = false)
     {
@@ -146,7 +155,7 @@ class Ess_M2ePro_Model_Magento_Product_Cache extends Ess_M2ePro_Model_Magento_Pr
         return $this->getMethodData(__FUNCTION__, $args);
     }
 
-    // ########################################
+    //########################################
 
     public function getAttributeValue($attributeCode)
     {
@@ -154,7 +163,7 @@ class Ess_M2ePro_Model_Magento_Product_Cache extends Ess_M2ePro_Model_Magento_Pr
         return $this->getMethodData(__FUNCTION__, $args);
     }
 
-    // ########################################
+    //########################################
 
     public function getThumbnailImageLink()
     {
@@ -173,14 +182,14 @@ class Ess_M2ePro_Model_Magento_Product_Cache extends Ess_M2ePro_Model_Magento_Pr
         return $this->getMethodData(__FUNCTION__, $args);
     }
 
-    // ########################################
+    //########################################
 
     public function hasRequiredOptions()
     {
         return $this->getMethodData(__FUNCTION__);
     }
 
-    // ----------------------------------------
+    // ---------------------------------------
 
     public function getVariationInstance()
     {
@@ -192,7 +201,7 @@ class Ess_M2ePro_Model_Magento_Product_Cache extends Ess_M2ePro_Model_Magento_Pr
         return $this->_variationInstance;
     }
 
-    // ########################################
+    //########################################
 
     protected function getMethodData($methodName, $params = null)
     {
@@ -224,5 +233,5 @@ class Ess_M2ePro_Model_Magento_Product_Cache extends Ess_M2ePro_Model_Magento_Pr
         return $this->setCacheValue($cacheKey, $data);
     }
 
-    // ########################################
+    //########################################
 }

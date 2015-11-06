@@ -6,16 +6,20 @@
 
 class Ess_M2ePro_Block_Adminhtml_Common_Amazon_Listing_TemplateDescription_Grid extends Mage_Adminhtml_Block_Widget_Grid
 {
+    const ACTION_STATUS_NEW_ASIN_NOT_ACCEPTED = 1;
+    const ACTION_STATUS_VARIATIONS_NOT_SUPPORTED = 2;
+    const ACTION_STATUS_READY_TO_BE_ASSIGNED = 3;
+
     protected $attributesSetsIds;
     protected $marketplaceId;
     protected $listingProduct;
-    protected $productsAttributesCountVariations;
+    protected $variationProductsIds;
 
     protected $checkNewAsinAccepted = false;
     protected $productsIds;
     protected $mapToTemplateJsFn = 'ListingGridHandlerObj.templateDescriptionHandler.mapToTemplateDescription';
 
-    //------------------------------
+    // ####################################
 
     /**
      * @return string
@@ -98,7 +102,7 @@ class Ess_M2ePro_Block_Adminhtml_Common_Amazon_Listing_TemplateDescription_Grid 
         $collection = Mage::helper('M2ePro/Component_Amazon')->getCollection('Template_Description');
         $collection->addFieldToFilter('marketplace_id', $this->getMarketplaceId());
 
-        $this->setCollection($collection);
+        $this->setCollection($this->prepareCollection($collection));
 
         return parent::_prepareCollection();
     }
@@ -191,38 +195,17 @@ HTML;
 
     public function callbackColumnStatus($value, $row, $column, $isExport)
     {
-        if ($this->getCheckNewAsinAccepted()) {
-            if (!$row->getChildObject()->isNewAsinAccepted()) {
+        switch($row->getData('description_template_action_status')) {
+            case self::ACTION_STATUS_NEW_ASIN_NOT_ACCEPTED:
                 return '<span style="color: #808080;">' .
                     Mage::helper('M2ePro')->__('New ASIN/ISBN feature is disabled') . '</span>';
-            }
-
-            $productAttrCounts = $this->getProductAttributesCountVariations();
-
-            if (!empty($productAttrCounts)) {
-                $detailsModel = Mage::getModel('M2ePro/Amazon_Marketplace_Details');
-                $detailsModel->setMarketplaceId($this->getMarketplaceId());
-                $themes = $detailsModel->getVariationThemes($row->getProductDataNick());
-
-                if (empty($themes)) {
-                    return '<span style="color: #808080;">' .
-                        Mage::helper('M2ePro')->__(
-                            'Selected Category doesn\'t support Variational Products'
-                        ) . '</span>';
-                }
-
-                $themeAttrCounts = array();
-                foreach ($themes as $theme) {
-                    $themeAttrCounts[] = count($theme['attributes']);
-                }
-
-                if (count(array_intersect($productAttrCounts, $themeAttrCounts)) !== count($productAttrCounts)) {
-                    return '<span style="color: #808080;">' .
-                        Mage::helper('M2ePro')->__(
-                            'This number of Variation Attributes cannot be used in chosen Category'
-                        ) . '</span>';
-                }
-            }
+                break;
+            case self::ACTION_STATUS_VARIATIONS_NOT_SUPPORTED:
+                return '<span style="color: #808080;">' .
+                    Mage::helper('M2ePro')->__(
+                        'Selected Category doesn\'t support Variational Products'
+                    ) . '</span>';
+                break;
         }
 
         return '<span style="color: green;">' . Mage::helper('M2ePro')->__('Ready to be assigned') . '</span>';
@@ -234,32 +217,16 @@ HTML;
         $mapToAsin = '';
 
         if ($this->getCheckNewAsinAccepted()) {
-            if (!$row->getChildObject()->isNewAsinAccepted()) {
-                return '<span style="color: #808080;">' . $assignText . '</span>';
-            }
-
-            $productAttrCounts = $this->getProductAttributesCountVariations();
-
-            if (!empty($productAttrCounts)) {
-                $detailsModel = Mage::getModel('M2ePro/Amazon_Marketplace_Details');
-                $detailsModel->setMarketplaceId($this->getMarketplaceId());
-                $themes = $detailsModel->getVariationThemes($row->getProductDataNick());
-
-                if (empty($themes)) {
-                    return '<span style="color: #808080;">' . $assignText . '</span>';
-                }
-
-                $themeAttrCounts = array();
-                foreach ($themes as $theme) {
-                    $themeAttrCounts[] = count($theme['attributes']);
-                }
-
-                if (count(array_intersect($productAttrCounts, $themeAttrCounts)) !== count($productAttrCounts)) {
-                    return '<span style="color: #808080;">' . $assignText . '</span>';
-                }
-            }
-
             $mapToAsin = ',1';
+        }
+
+        switch($row->getData('description_template_action_status')) {
+            case self::ACTION_STATUS_NEW_ASIN_NOT_ACCEPTED:
+                return '<span style="color: #808080;">' . $assignText . '</span>';
+                break;
+            case self::ACTION_STATUS_VARIATIONS_NOT_SUPPORTED:
+                return '<span style="color: #808080;">' . $assignText . '</span>';
+                break;
         }
 
         return '<a href="javascript:void(0);"'
@@ -384,37 +351,84 @@ HTML;
 
     //---------------------------------------
 
-    protected function getProductAttributesCountVariations()
+    protected function getVariationsProductsIds()
     {
-        if (is_null($this->productsAttributesCountVariations)) {
-            $this->productsAttributesCountVariations = array();
+        if (is_null($this->variationProductsIds)) {
+            $this->variationProductsIds = array();
 
             /** @var Ess_M2ePro_Model_Mysql4_Amazon_Listing_Product_Collection $collection */
-            $collection = Mage::getModel('M2ePro/Listing_Product')->getCollection();
-            $collection->addFieldToFilter('component_mode', Ess_M2ePro_Helper_Component_Amazon::NICK);
+            $collection = Mage::helper('M2ePro/Component_Amazon')->getCollection('Listing_Product');
             $collection->addFieldToFilter('additional_data', array('notnull' => true));
             $collection->addFieldToFilter('id', array('in' => $this->getProductsIds()));
-            $collection->addFieldToSelect('additional_data');
-
-            $collection->join(
-                array('alp' => 'M2ePro/Amazon_Listing_Product'),
-                'listing_product_id=id',
-                null
-            );
             $collection->addFieldToFilter('is_variation_parent', 1);
 
-            foreach ($collection->getData() as $row) {
-                $data = json_decode($row['additional_data'], true);
+            $collection->getSelect()->reset(Zend_Db_Select::COLUMNS);
+            $collection->getSelect()->columns(
+                array(
+                    'main_table.id'
+                )
+            );
 
-                $count = count($data['variation_product_attributes']);
-                if (!in_array($count, $this->productsAttributesCountVariations)) {
-                    $this->productsAttributesCountVariations[] = $count;
+            $this->variationProductsIds = $collection->getData();
+        }
+
+        return $this->variationProductsIds;
+    }
+
+    // ####################################
+
+    private function prepareCollection($collection)
+    {
+        /** @var Ess_M2ePro_Model_Mysql4_Amazon_Template_Description_Collection $preparedCollection */
+        $preparedCollection = new Varien_Data_Collection();
+
+        $data = $collection->getData();
+        $preparedData = array();
+        foreach ($data as $item) {
+            if (!$this->getCheckNewAsinAccepted()) {
+                $item['description_template_action_status'] = self::ACTION_STATUS_READY_TO_BE_ASSIGNED;
+                $preparedData[] = $item;
+                continue;
+            }
+
+            if (!$item['is_new_asin_accepted']) {
+                $item['description_template_action_status'] = self::ACTION_STATUS_NEW_ASIN_NOT_ACCEPTED;
+                $preparedData[] = $item;
+                continue;
+            }
+
+            $variationProductsIds = $this->getVariationsProductsIds();
+
+            if (!empty($variationProductsIds)) {
+                $detailsModel = Mage::getModel('M2ePro/Amazon_Marketplace_Details');
+                $detailsModel->setMarketplaceId($this->getMarketplaceId());
+                $themes = $detailsModel->getVariationThemes($item['product_data_nick']);
+
+                if (empty($themes)) {
+                    $item['description_template_action_status'] = self::ACTION_STATUS_VARIATIONS_NOT_SUPPORTED;
+                    $preparedData[] = $item;
+                    continue;
                 }
+            }
+
+            $item['description_template_action_status'] = self::ACTION_STATUS_READY_TO_BE_ASSIGNED;
+            $preparedData[] = $item;
+            continue;
+        }
+
+        if (!empty($preparedData)) {
+            usort($preparedData, function($a, $b)
+            {
+                return $a["description_template_action_status"] < $b["description_template_action_status"];
+            });
+
+            foreach ($preparedData as $item) {
+                $preparedCollection->addItem(new Varien_Object($item));
             }
         }
 
-        return $this->productsAttributesCountVariations;
+        return $preparedCollection;
     }
 
-    //---------------------------------------
+    // ####################################
 }

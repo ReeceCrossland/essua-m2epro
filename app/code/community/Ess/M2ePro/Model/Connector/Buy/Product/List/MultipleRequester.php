@@ -1,14 +1,14 @@
 <?php
 
 /*
- * @copyright  Copyright (c) 2013 by  ESS-UA.
+ * @author     M2E Pro Developers Team
+ * @copyright  2011-2015 ESS-UA [M2E Pro]
+ * @license    Commercial use is forbidden
  */
 
 class Ess_M2ePro_Model_Connector_Buy_Product_List_MultipleRequester
     extends Ess_M2ePro_Model_Connector_Buy_Product_Requester
 {
-    // ########################################
-
     private $generalValidatorsObjects = array();
 
     private $skuGeneralValidatorsObjects = array();
@@ -21,7 +21,7 @@ class Ess_M2ePro_Model_Connector_Buy_Product_List_MultipleRequester
 
     private $validatorsData = array();
 
-    // ########################################
+    //########################################
 
     public function __construct(array $params = array(), array $listingsProducts)
     {
@@ -39,14 +39,17 @@ class Ess_M2ePro_Model_Connector_Buy_Product_List_MultipleRequester
         }
     }
 
-    // ########################################
+    //########################################
 
+    /**
+     * @return array
+     */
     public function getCommand()
     {
         return array('product','update','entities');
     }
 
-    // ########################################
+    //########################################
 
     protected function getActionType()
     {
@@ -58,7 +61,7 @@ class Ess_M2ePro_Model_Connector_Buy_Product_List_MultipleRequester
         return Ess_M2ePro_Model_Listing_Log::ACTION_LIST_PRODUCT_ON_COMPONENT;
     }
 
-    // ########################################
+    //########################################
 
     public function eventBeforeProcessing()
     {
@@ -73,7 +76,7 @@ class Ess_M2ePro_Model_Connector_Buy_Product_List_MultipleRequester
         $this->addSkusToQueue($skus);
     }
 
-    // ########################################
+    //########################################
 
     protected function validateAndFilterListingsProducts()
     {
@@ -92,7 +95,7 @@ class Ess_M2ePro_Model_Connector_Buy_Product_List_MultipleRequester
         $this->processGeneralIdValidateAndFilter();
     }
 
-    // ########################################
+    //########################################
 
     private function processGeneralValidateAndFilter()
     {
@@ -273,7 +276,7 @@ class Ess_M2ePro_Model_Connector_Buy_Product_List_MultipleRequester
         }
     }
 
-    // ########################################
+    //########################################
 
     private function getValidatorsData(Ess_M2ePro_Model_Listing_Product $listingProduct, $key = null)
     {
@@ -302,7 +305,7 @@ class Ess_M2ePro_Model_Connector_Buy_Product_List_MultipleRequester
         $this->validatorsData[$listingProductId] = array_merge($this->validatorsData[$listingProductId], $data);
     }
 
-    // ########################################
+    //########################################
 
     private function addSkusToQueue(array $skus)
     {
@@ -340,7 +343,7 @@ class Ess_M2ePro_Model_Connector_Buy_Product_List_MultipleRequester
         return $lockItem->getContentData();
     }
 
-    // ########################################
+    //########################################
 
     /**
      * @param Ess_M2ePro_Model_Listing_Product $listingProduct
@@ -358,7 +361,7 @@ class Ess_M2ePro_Model_Connector_Buy_Product_List_MultipleRequester
             $validator->setParams($this->params);
             $validator->setListingProduct($listingProduct);
             $validator->setData($this->getValidatorsData($listingProduct));
-            $validator->setConfigurator($this->getConfigurator());
+            $validator->setConfigurator($listingProduct->getActionConfigurator());
 
             $this->generalValidatorsObjects[$listingProduct->getId()] = $validator;
         }
@@ -382,7 +385,7 @@ class Ess_M2ePro_Model_Connector_Buy_Product_List_MultipleRequester
             $validator->setParams($this->params);
             $validator->setListingProduct($listingProduct);
             $validator->setData($this->getValidatorsData($listingProduct));
-            $validator->setConfigurator($this->getConfigurator());
+            $validator->setConfigurator($listingProduct->getActionConfigurator());
 
             $this->skuGeneralValidatorsObjects[$listingProduct->getId()] = $validator;
         }
@@ -406,7 +409,7 @@ class Ess_M2ePro_Model_Connector_Buy_Product_List_MultipleRequester
             $validator->setParams($this->params);
             $validator->setListingProduct($listingProduct);
             $validator->setData($this->getValidatorsData($listingProduct));
-            $validator->setConfigurator($this->getConfigurator());
+            $validator->setConfigurator($listingProduct->getActionConfigurator());
 
             $this->skuSearchValidatorsObjects[$listingProduct->getId()] = $validator;
         }
@@ -430,7 +433,7 @@ class Ess_M2ePro_Model_Connector_Buy_Product_List_MultipleRequester
             $validator->setParams($this->params);
             $validator->setListingProduct($listingProduct);
             $validator->setData($this->getValidatorsData($listingProduct));
-            $validator->setConfigurator($this->getConfigurator());
+            $validator->setConfigurator($listingProduct->getActionConfigurator());
 
             $this->skuExistenceValidatorsObjects[$listingProduct->getId()] = $validator;
         }
@@ -454,7 +457,7 @@ class Ess_M2ePro_Model_Connector_Buy_Product_List_MultipleRequester
             $validator->setParams($this->params);
             $validator->setListingProduct($listingProduct);
             $validator->setData($this->getValidatorsData($listingProduct));
-            $validator->setConfigurator($this->getConfigurator());
+            $validator->setConfigurator($listingProduct->getActionConfigurator());
 
             $this->generalIdValidatorsObjects[$listingProduct->getId()] = $validator;
         }
@@ -462,7 +465,7 @@ class Ess_M2ePro_Model_Connector_Buy_Product_List_MultipleRequester
         return $this->generalIdValidatorsObjects[$listingProduct->getId()];
     }
 
-    // ########################################
+    //########################################
 
     /**
      * @param Ess_M2ePro_Model_Listing_Product $listingProduct
@@ -479,7 +482,7 @@ class Ess_M2ePro_Model_Connector_Buy_Product_List_MultipleRequester
 
             $request->setParams($this->params);
             $request->setListingProduct($listingProduct);
-            $request->setConfigurator($this->getConfigurator());
+            $request->setConfigurator($listingProduct->getActionConfigurator());
             $request->setValidatorsData($this->getValidatorsData($listingProduct));
 
             $this->requestsObjects[$listingProduct->getId()] = $request;
@@ -488,5 +491,5 @@ class Ess_M2ePro_Model_Connector_Buy_Product_List_MultipleRequester
         return $this->requestsObjects[$listingProduct->getId()];
     }
 
-    // ########################################
+    //########################################
 }

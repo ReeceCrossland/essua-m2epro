@@ -1,7 +1,7 @@
 CommonAmazonTemplateSynchronizationHandler = Class.create();
 CommonAmazonTemplateSynchronizationHandler.prototype = Object.extend(new CommonHandler(), {
 
-    //----------------------------------
+    // ---------------------------------------
 
     initialize: function()
     {
@@ -32,7 +32,7 @@ CommonAmazonTemplateSynchronizationHandler.prototype = Object.extend(new CommonH
             return true;
         });
 
-        //-----------------
+        // ---------------------------------------
         Validation.add('M2ePro-validate-conditions-between', M2ePro.translator.translate('Must be greater than "Min".'), function(value, el) {
 
             var minValue = $(el.id.replace('_max','')).value;
@@ -43,9 +43,9 @@ CommonAmazonTemplateSynchronizationHandler.prototype = Object.extend(new CommonH
 
             return parseInt(value) > parseInt(minValue);
         });
-        //-----------------
+        // ---------------------------------------
 
-        //-----------------
+        // ---------------------------------------
         Validation.add('M2ePro-validate-stop-relist-conditions-product-status', M2ePro.translator.translate('Inconsistent Settings in Relist and Stop Rules.'), function(value, el) {
 
             if (AmazonTemplateSynchronizationHandlerObj.isRelistModeDisabled()) {
@@ -116,17 +116,17 @@ CommonAmazonTemplateSynchronizationHandler.prototype = Object.extend(new CommonH
 
             return true;
         });
-        //-----------------
+        // ---------------------------------------
     },
 
-    //----------------------------------
+    // ---------------------------------------
 
     isRelistModeDisabled: function()
     {
         return $('relist_mode').value == 0;
     },
 
-    //----------------------------------
+    // ---------------------------------------
 
     duplicate_click: function($headId)
     {
@@ -138,7 +138,7 @@ CommonAmazonTemplateSynchronizationHandler.prototype = Object.extend(new CommonH
         CommonHandlerObj.duplicate_click($headId, M2ePro.translator.translate('Add Synchronization Policy.'));
     },
 
-    //----------------------------------
+    // ---------------------------------------
 
     stopQty_change: function()
     {
@@ -312,17 +312,19 @@ CommonAmazonTemplateSynchronizationHandler.prototype = Object.extend(new CommonH
         $('revise_update_qty_max_applied_value_mode').simulate('change');
     },
 
-    //----------------------------------
+    // ---------------------------------------
 
     revisePrice_change: function()
     {
         if (this.value == M2ePro.php.constant('Ess_M2ePro_Model_Amazon_Template_Synchronization::REVISE_UPDATE_PRICE_YES')) {
             $('revise_update_price_max_allowed_deviation_mode_tr').show();
             $('revise_update_price_max_allowed_deviation_tr').show();
+            $('revise_update_price_line').show();
             $('revise_update_price_max_allowed_deviation_mode').simulate('change');
         } else {
             $('revise_update_price_max_allowed_deviation_mode_tr').hide();
             $('revise_update_price_max_allowed_deviation_tr').hide();
+            $('revise_update_price_line').hide();
             $('revise_update_price_max_allowed_deviation_mode').value = M2ePro.php.constant('Ess_M2ePro_Model_Amazon_Template_Synchronization::REVISE_MAX_ALLOWED_PRICE_DEVIATION_MODE_OFF');
         }
     },
@@ -376,5 +378,5 @@ CommonAmazonTemplateSynchronizationHandler.prototype = Object.extend(new CommonH
         $('revise_update_price_max_allowed_deviation_mode').simulate('change');
     }
 
-    //----------------------------------
+    // ---------------------------------------
 });

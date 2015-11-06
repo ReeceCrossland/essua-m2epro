@@ -1,16 +1,18 @@
 <?php
 
 /*
- * @copyright  Copyright (c) 2013 by  ESS-UA.
+ * @author     M2E Pro Developers Team
+ * @copyright  2011-2015 ESS-UA [M2E Pro]
+ * @license    Commercial use is forbidden
  */
 
 class Ess_M2ePro_Helper_View_Common_Controller extends Mage_Core_Helper_Abstract
 {
-    // ########################################
+    //########################################
 
     public function addMessages(Ess_M2ePro_Controller_Adminhtml_BaseController $controller)
     {
-        if (Mage::helper('M2ePro/Module_Cron')->isReadyToRun() &&
+        if (Mage::helper('M2ePro/Module')->isReadyToWork() &&
             Mage::helper('M2ePro/Module_Cron')->isLastRunMoreThan(1,true) &&
             !Mage::helper('M2ePro/Module')->isDevelopmentEnvironment()) {
 
@@ -25,7 +27,7 @@ class Ess_M2ePro_Helper_View_Common_Controller extends Mage_Core_Helper_Abstract
         }
     }
 
-    // ########################################
+    //########################################
 
     private function addCronErrorMessage(Ess_M2ePro_Controller_Adminhtml_BaseController $controller)
     {
@@ -86,11 +88,11 @@ class Ess_M2ePro_Helper_View_Common_Controller extends Mage_Core_Helper_Abstract
         }
 
 // M2ePro_TRANSLATIONS
-// %marketplace_title% data was changed on Amazon. You need to synchronize it the Extension works properly. Please, go to %menu_label% > <a href="%url%" target="_blank">Marketplaces</a> and click the Update All Button.
+// %marketplace_title% data was changed on Amazon. You need to synchronize it the Extension works properly. Please, go to %menu_label% > <a href="%url%" target="_blank">Marketplaces</a> and click the Update All Now Button.
 
         $message = '%marketplace_title% data was changed on Amazon. You need to synchronize it '.
                    'the Extension works properly. Please, go to %menu_path% > '.
-                   '<a href="%url%" target="_blank">Marketplaces</a> and click the Update All Button.';
+                   '<a href="%url%" target="_blank">Marketplaces</a> and click the Update All Now Button.';
 
         $controller->getSession()->addNotice(Mage::helper('M2ePro')->__(
             $message,
@@ -103,5 +105,5 @@ class Ess_M2ePro_Helper_View_Common_Controller extends Mage_Core_Helper_Abstract
         ));
     }
 
-    // ########################################
+    //########################################
 }
